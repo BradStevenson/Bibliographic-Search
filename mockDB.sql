@@ -18,10 +18,6 @@ CREATE TABLE Citation (
         REFERENCES Papers(paperID)
 );
 
-CREATE TABLE Author (
-	SciSearcher
-);
-
 INSERT INTO Papers SET (
 	title AS atitle,
 	author AS aauthor,
