@@ -1,47 +1,70 @@
-CREATE TABLE Papers (
-	paperID int NOT NULL auto_increment,
+-- Page Rank
+-- PR(A) = (1-d) + d(PR(C1)/C(C1) + ... PR(Cn)/C(Cn))
+
+-- Methods implementer in MySQL
+
+-- |P| = All papers which cite paper P.
+-- N = Number of paper cited from paper P.
+-- |P| = (C1 ... Cn) =  SELECT * FROM Papers INNER JOIN Citations ON Papers.paperID=Citations.citedPaperID WHERE Papers.paperID=P;
+-- N(P) = SELECT COUNT(*) FROM Citations WHERE paperID=P;
+
+-- PageRank value for each paper is added programmatically into pageRank column.
+-- Each cluster we identify (research field) is then assigned an id which is added to clusterID column.
+
+DROP TABLE IF EXISTS Papers;
+DROP TABLE IF EXISTS Citations;
+
+CREATE TABLE Papers
+(
+	paperID int NOT NULL AUTO_INCREMENT,
 	title varchar(255),
 	author varchar(50),
 	year int NOT NULL,
 	url varchar(255),
-	citedPaperID int NOT NULL,
-	PRIMARY KEY (paperID),
-	FOREIGN KEY (citedPaperID)
-		REFERENCES Citation(citationID)
-);
+	pageRank int,
+	clusterID int,
+	CONSTRAINT
+		PRIMARY KEY (paperID)
+	-- CONSTRAINT
+	-- 	FOREIGN KEY (citedPaperID)
+	-- 	REFERENCES Citations (citationID)
+)ENGINE=InnoDB;
 
-CREATE TABLE Citation (
+CREATE TABLE Citations (
 	citationID int NOT NULL auto_increment,
-	paperID int,
-	PRIMARY KEY (citationID),
-	FOREIGN KEY (paperID) 
-        REFERENCES Papers(paperID)
+	paperID int NOT NULL,
+	citedPaperID int NOT NULL,
+	CONSTRAINT
+		PRIMARY KEY (citationID)
+	-- CONSTRAINT
+	-- 	FOREIGN KEY (paperID) 
+ --        REFERENCES Papers(paperID)
+)ENGINE=InnoDB;
+
+INSERT INTO Papers (title, author, year) VALUES (
+	"aTitle", "aAuthor", 1994
 );
 
-INSERT INTO Papers SET (
-	title AS atitle,
-	author AS aauthor,
-	year AS 1994
+INSERT INTO Citations (paperID, citedPaperID) VALUES (
+	1, 2
 );
 
-INSERT INTO Citation SET (
-	paperID = 1,
-	citedPaperID = 2
+INSERT INTO Citations (paperID, citedPaperID) VALUES (
+	1, 3
 );
 
-INSERT INTO Citation SET (
-	paperID = 1,
-	citedPaperID = 3
+INSERT INTO Citations (paperID, citedPaperID) VALUES (
+	2, 3
 );
 
-INSERT INTO Papers SET (
-	title AS btitle,
-	author AS bauthor,
-	year AS 1995
+INSERT INTO Citations (paperID, citedPaperID) VALUES (
+	3, 1
 );
 
-INSERT INTO Papers SET (
-	title AS ctitle,
-	author AS cauthor,
-	year AS 2002
+INSERT INTO Papers (title, author, year) VALUES (
+	"bTitle", "bAuthor", 1995
+);
+
+INSERT INTO Papers (title, author, year) VALUES (
+	"cTitle", "cAuthor", 2002
 );
