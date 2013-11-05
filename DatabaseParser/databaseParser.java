@@ -9,15 +9,15 @@ public class parser {
     private static double[] PRs = {1,1,1};
     
     public static void main(String[] args) {
-	startConnection();
-	
-	pageRank(1, 0);
-	
-//	addPageRankToTable(1, pageRank(1, 0));
-//	addPageRankToTable(2, pageRank(2, 0));
-//	addPageRankToTable(3, pageRank(3, 0));
-	
-	endConnection();
+    startConnection();
+    
+    pageRank(1, 0);
+    
+//  addPageRankToTable(1, pageRank(1, 0));
+//  addPageRankToTable(2, pageRank(2, 0));
+//  addPageRankToTable(3, pageRank(3, 0));
+    
+    endConnection();
     }
     
     private static void startConnection() {
@@ -35,37 +35,36 @@ public class parser {
     }
     
     private static void pageRank(int paperID, int counter) {
-	double damping = 0.8;
-	double pageRank;
-	counter += 1;
-	
+    double damping = 0.8;
+    double pageRank;
+    counter += 1;
+    
         ArrayList<Integer>incomingCitations = getTOfPaperID(paperID);
         double sumPRT = 0;
         Iterator<Integer> itr = incomingCitations.iterator();
         while(itr.hasNext()) {
-    	    int ID = itr.next();
-    	    double val = PRs[ID-1]/getNOfPaperID(ID);
-    	    sumPRT += val;
+            int ID = itr.next();
+            double val = PRs[ID-1]/getNOfPaperID(ID);
+            sumPRT += val;
         }
-       
-        pageRank = (1-damping) * damping * sumPRT;
-	
+        pageRank = (1-damping) + (damping * sumPRT);
+    
         PRs[paperID-1] = pageRank;
         
         // DEBUGGING USE, SHOWS UPDATED PAGE RANK FOR EACH ALGORITHM.
         // ERROR ON ITERATION 3 PR(C). (Value too small).
         for (int i = 0; i < PRs.length; i++) {
             if (i==0) { 
-        	System.out.println("PR(A) = " + PRs[i]);
+            System.out.println("PR(A) = " + PRs[i]);
             } else if (i == 1) {
-        	System.out.println("PR(B) = " + PRs[i]);
+            System.out.println("PR(B) = " + PRs[i]);
             } else {
-        	System.out.println("PR(C) = " + PRs[i]);
+            System.out.println("PR(C) = " + PRs[i]);
             }
         }
-	System.out.println("---------- iteration " + counter + " complete\n");
-	
-	// Call recursively or end.
+    System.out.println("---------- iteration " + counter + " complete\n");
+    
+    // Call recursively or end.
         if (counter < 100) {
             if (PRs.length >= paperID+1)
                 pageRank(paperID+1, counter);
@@ -77,13 +76,13 @@ public class parser {
     }
     
     private static ArrayList<Integer> getTOfPaperID(int paperID) {
-	ArrayList<Integer> paperIDs = new ArrayList<Integer>();
+    ArrayList<Integer> paperIDs = new ArrayList<Integer>();
         try {
             Statement st = conn.createStatement();
             ResultSet res = st.executeQuery("SELECT Citations.paperID  FROM Papers INNER JOIN Citations ON Papers.paperID=Citations.citedPaperID WHERE Papers.paperID="+paperID);
             while (res.next()) {
-        	int citingPaperID = res.getInt("paperID");
-        	paperIDs.add(citingPaperID);
+            int citingPaperID = res.getInt("paperID");
+            paperIDs.add(citingPaperID);
             }
             return paperIDs;
         } catch (Exception e) {
@@ -98,7 +97,7 @@ public class parser {
             ResultSet res = st.executeQuery("SELECT COUNT(*) FROM Citations WHERE paperID="+paperID);
             int count = 0;
             while (res.next()) {
-        	count = res.getInt("Count(*)");
+            count = res.getInt("Count(*)");
             }
             return count;
         } catch (Exception e) {
@@ -120,10 +119,9 @@ public class parser {
     
     private static void endConnection() {
         try {
-	    conn.close();
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
+        conn.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
     }
 }
-
