@@ -1,119 +1,110 @@
-package databaseParserPackage;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-public class databaseParser {
-    public static void main (String argv[]) {
-	/*
-	 * Setup MySQL here when we have it hosted.
-	 */
+public class Parser {
+    private static Connection conn;
+    private static double[] PRs = {1,1,1,1};
+    
+    public static void main(String[] args) {
+	startConnection();
+	
+	System.out.println(pageRank(1, 0));
+	System.out.println(pageRank(2, 0));
+	System.out.println(pageRank(3, 0));
+	
+//	addPageRankToTable(1, pageRank(1, 0));
+//	addPageRankToTable(2, pageRank(2, 0));
+//	addPageRankToTable(3, pageRank(3, 0));
+	
+	endConnection();
+    }
+    
+    private static void startConnection() {
+        String url = "jdbc:mysql://localhost:3306/";
+        String dbName = "SciSearcher";
+        String driver = "com.mysql.jdbc.Driver";
+        String userName = "root";
+        String password = "t4k34ch4nc3";
         try {
-            // Setting up our SAXParser
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            String PATH_TO_XML_FILE = "dblp.xml";
-            
-            DefaultHandler handler = new DefaultHandler() {
-            
-        	// Adding all the fields we wish to extract.
-                boolean bAuthor = false;
-                boolean bTitle = false;
-                boolean bPages = false;
-                boolean bYear = false;
-                boolean bVolume = false;
-                boolean bJournal = false;
-                boolean bNumber = false;
-                boolean bEE = false;
-                boolean bURL = false;
-                
-                // Scans each section and marks which properties it has.
-                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            		System.out.println("Start element: " + qName);
-            		if (qName.equalsIgnoreCase("AUTHOR")) {
-            		    bAuthor = true;
-            		}
-            		if (qName.equalsIgnoreCase("TITLE")) {
-            		    bTitle = true;
-            		}
-            		if (qName.equalsIgnoreCase("PAGES")) {
-            		    bPages = true;
-            		}
-            		if (qName.equalsIgnoreCase("YEAR")) {
-            		    bYear = true;
-            		}
-            		if (qName.equalsIgnoreCase("VOLUME")) {
-            		    bVolume = true;
-            		}
-            		if (qName.equalsIgnoreCase("JOURNAL")) {
-            		    bJournal = true;
-            		}
-            		if (qName.equalsIgnoreCase("NUMBER")) {
-            		    bNumber = true;
-            		}
-            		if (qName.equalsIgnoreCase("EE")) {
-            		    bEE = true;
-            		}
-            		if (qName.equalsIgnoreCase("URL")) {
-            		    bURL = true;
-            		}
-            		
-                }
-          
-                public void endElement(String uri, String localName, String qName) throws SAXException {
-            		System.out.println("End element: " + qName);
-                }
-                // Prints out the values for each property which is marked true.
-                public void characters(char ch[], int start, int length) throws SAXException {
-                    if (bAuthor) {
-                	System.out.println("Author: " + new String(ch, start, length));
-                	// This is where we add to MySQL 
-                	
-                	bAuthor = false; // Mark false for next run.
-                    }
-                    if (bTitle) {
-                	System.out.println("Title: " + new String(ch, start, length));
-                	bTitle = false;
-                    }
-                    if (bPages) {
-                	System.out.println("Pages: " + new String(ch, start, length));
-                	bPages = false;
-                    }
-                    if (bYear) {
-                	System.out.println("Year: " + new String(ch, start, length));
-                	bYear = false;
-                    }
-                    if (bVolume) {
-                	System.out.println("Volume: " + new String(ch, start, length));
-                	bVolume = false;
-                    }
-                    if (bJournal) {
-                	System.out.println("Journal: " + new String(ch, start, length));
-                	bAuthor = false;
-                    }
-                    if (bNumber) {
-                	System.out.println("Number: " + new String(ch, start, length));
-                	bNumber = false;
-                    }
-                    if (bEE) {
-                	System.out.println("EE: " + new String(ch, start, length));
-                	bEE = false;
-                    }
-                    if (bURL) {
-                	System.out.println("URL: " + new String(ch, start, length));
-                	bURL = false;
-                    }
-                }
-            };
-            
-            saxParser.parse(PATH_TO_XML_FILE, handler);
-            
+            Class.forName(driver).newInstance();
+            conn = DriverManager.getConnection(url+dbName,userName,password);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
+    private static double pageRank(int paperID, int it) {
+	double damping = 0.8;
+	double pageRank;
+	if (it < 10) {
+            ArrayList<Integer>incomingCitations = getTOfPaperID(paperID);
+            double sumPRT = 0;
+            Iterator<Integer> itr = incomingCitations.iterator();
+            while(itr.hasNext()) {
+        	int ID = itr.next();
+        	double prID = pageRank(ID, it+=1);
+        	PRs[ID] = prID;
+        	double val = prID/getNOfPaperID(ID);
+        	sumPRT += val;
+//        	System.out.println("PR("+paperID+") = "+(1-damping) + damping*sumPRT);
+            }
+    	pageRank = (1-damping) + damping*sumPRT;
+    	return pageRank;
+	}
+	return 0;
+    }
+    
+    private static ArrayList<Integer> getTOfPaperID(int paperID) {
+	ArrayList<Integer> paperIDs = new ArrayList<Integer>();
+        try {
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT Citations.paperID  FROM Papers INNER JOIN Citations ON Papers.paperID=Citations.citedPaperID WHERE Papers.paperID="+paperID);
+            while (res.next()) {
+        	int citingPaperID = res.getInt("paperID");
+        	paperIDs.add(citingPaperID);
+            }
+            return paperIDs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    private static int getNOfPaperID(int paperID) {
+        try {
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT COUNT(*) FROM Citations WHERE paperID="+paperID);
+            int count = 0;
+            while (res.next()) {
+        	count = res.getInt("Count(*)");
+            }
+            return count;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
+    private static void addPageRankToTable(int paperID, double PR) {
+        try {
+            Statement st = conn.createStatement();
+            int val = st.executeUpdate("INSERT INTO Papers (pageRank) VALUES ("+ PR +")");
+            if(val==1)
+                System.out.print("Successfully inserted value");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static void endConnection() {
+        try {
+	    conn.close();
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+    }
 }
+
