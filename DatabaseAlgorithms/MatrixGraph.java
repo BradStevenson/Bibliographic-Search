@@ -1,3 +1,8 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -6,12 +11,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 
-public class MatrixGraph {
+public class MatrixGraph implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private static Connection conn;
-    public boolean[][] graph;
+    public static boolean[][] graph;
     
     public MatrixGraph() {
-	
 	startConnection();
 	for (int paper : getAllPaperIDs()) {
 	    for(int citedPaper : getPapersCitedByPaperID(paper)) {
@@ -78,5 +83,34 @@ public class MatrixGraph {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static boolean[][] deserializeGraph() {
+	try {
+	    FileInputStream fileIn = new FileInputStream("/matrixGraph.ser");
+	    ObjectInputStream in = new ObjectInputStream(fileIn);
+	    boolean[][] users = (boolean[][]) in.readObject();
+	    in.close();
+	    fileIn.close();
+	    return users;
+	} catch (IOException i) {
+	    i.printStackTrace();
+	    return null;
+	} catch (ClassNotFoundException c) {
+	    c.printStackTrace();
+	    return null;
+	}
+    }
+
+    public static void serializeGraph() {
+	try {
+	    FileOutputStream fileOut = new FileOutputStream("/matrixGraph.ser");
+	    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	    out.writeObject(graph);
+	    out.close();
+	    fileOut.close();
+	} catch (IOException i) {
+	    i.printStackTrace();
+	}
     }
 }
