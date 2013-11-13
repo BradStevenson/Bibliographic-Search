@@ -32,7 +32,7 @@ public class MatrixGraph implements java.io.Serializable {
         String dbName = "SciSearcher";
         String driver = "com.mysql.jdbc.Driver";
         String userName = "root";
-        String password = "t4k34ch4nc3";
+        String password = "";
         try {
             Class.forName(driver).newInstance();
             conn = DriverManager.getConnection(url+dbName,userName,password);
