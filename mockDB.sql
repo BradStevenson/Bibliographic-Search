@@ -41,30 +41,30 @@ CREATE TABLE Citations (
  --        REFERENCES Papers(paperID)
 )ENGINE=InnoDB;
 
-INSERT INTO Papers (title, author, year) VALUES (
-	"aTitle", "aAuthor", 1994
-);
+-- INSERT INTO Papers (title, author, year) VALUES (
+-- 	"aTitle", "aAuthor", 1994
+-- );
 
-INSERT INTO Citations (paperID, citedPaperID) VALUES (
-	1, 2
-);
+-- INSERT INTO Citations (paperID, citedPaperID) VALUES (
+-- 	1, 2
+-- );
 
-INSERT INTO Citations (paperID, citedPaperID) VALUES (
-	1, 3
-);
+-- INSERT INTO Citations (paperID, citedPaperID) VALUES (
+-- 	1, 3
+-- );
 
-INSERT INTO Citations (paperID, citedPaperID) VALUES (
-	2, 3
-);
+-- INSERT INTO Citations (paperID, citedPaperID) VALUES (
+-- 	2, 3
+-- );
 
-INSERT INTO Citations (paperID, citedPaperID) VALUES (
-	3, 1
-);
+-- INSERT INTO Citations (paperID, citedPaperID) VALUES (
+-- 	3, 1
+-- );
 
-INSERT INTO Papers (title, author, year) VALUES (
-	"bTitle", "bAuthor", 1995
-);
+-- INSERT INTO Papers (title, author, year) VALUES (
+-- 	"bTitle", "bAuthor", 1995
+-- );
 
-INSERT INTO Papers (title, author, year) VALUES (
-	"cTitle", "cAuthor", 2002
-);
+-- INSERT INTO Papers (title, author, year) VALUES (
+-- 	"cTitle", "cAuthor", 2002
+-- );
