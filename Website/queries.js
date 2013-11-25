@@ -2,7 +2,7 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'cs.nott.ac.uk',
   user     : 'gp13_pkl',
-  password : 'CVSFTW',
+  password : 'CVNFTW',
   database : 'gp13_pkl',
 });
 
