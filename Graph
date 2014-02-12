@@ -1,0 +1,163 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+
+public class Main {
+	
+	
+	Statement statement;
+	
+	
+	int maxPapers = 0;
+	maxPapers = this.getNumberOfPapers();
+	int[][] graphMatrix = new int [maxPapers][maxPapers];
+	
+
+
+
+public int getNumberOfPapers(){ //not including marked deleted mails
+	String sql = "Select Count(*) AS test FROM Papers";
+	try {
+		ResultSet results = statement.executeQuery(sql);//execute statement
+			while(results.next()){
+				
+
+			return results.getInt("test");
+			}
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+
+	
+	return 0;
+}	
+
+
+
+
+public void insertIntoGraph(){
+	
+	for(int row = 0; row <= maxPapers; row++){
+		 ArrayList<Integer> citedArray = citedPaperID(row);
+			if(citedArray.size() != 0){
+				
+				for(int column = 0; column < citedArray.size(); column++){
+					graphMatrix[row][citedArray.get(column)] = 1/getnCites(citedArray.get(column));
+				}
+			}
+		
+	}
+	
+	
+}
+
+public int getnCites(int ID){
+	String sql = "Select ncites from papers where paperID ='"+ID;
+	int total = 0;
+	try {
+		ResultSet results = statement.executeQuery(sql);//execute statement
+			results.next();
+				 
+			
+			return  results.getInt(1);
+			
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return 0;
+}
+
+
+
+public ArrayList<Integer> citedPaperID(int ID){
+	// ADD CHECK FOR YEAR AND AUTHOR.
+	String sql ="Select id FROM paper WHERE title = (Select title FROM citation WHERE paperid = "+ID+")";
+	ArrayList<Integer> citedPapers = new ArrayList();
+	int i=0;
+	try {
+		ResultSet results = statement.executeQuery(sql);
+		while(results.next()){
+			citedPapers.add(results.getInt(i+1));
+		}
+		//results.absolute(num);
+
+			return citedPapers;
+			
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	
+	return null;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public int citedAuthorID(){
+	String sql ="Select paperid FROM authors WHERE name = (Select authors FROM citation)";
+	
+	try {
+		ResultSet results = statement.executeQuery(sql);
+		//results.absolute(num);
+
+			return results.getInt(1);
+			
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	
+	return 0;
+}
+public int citedTitleID(){
+	String sql ="Select id FROM paper WHERE title = (Select title FROM citation)";
+	
+	try {
+		ResultSet results = statement.executeQuery(sql);
+		//results.absolute(num);
+
+			return results.getInt(1);
+			
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	
+	return 0;
+}
+
+
+
+
+
+
+public int getCitedPaperID(){
+	if(citedAuthorID() ==  citedTitleID()){
+		return citedAuthorID();
+	}
+	return 0;
+}
+
+}
+
+
+
+
