@@ -26,6 +26,37 @@
     } else {
       $query = "SELECT * FROM Papers WHERE title LIKE '%".$searchTerm."%'";
     }
+    
+    
+    
+    /* Tiffany here  modify the line from 23 - 28*/
+    
+    $searchTerm = $_GET["search"];
+    if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
+      $query = "SELECT * FROM Papers ORDER BY pr WHERE year =". $searchTerm; // pr is the pagerank of the paper however i have not create this varaible yet, just used
+    } else {
+       if (var_dump( $searchTerm > "/^[0-9]{4}$/")) {
+         $query =  "SELECT Authors.name FROM Author ORDER BY pr WHERE Authors.paperid = ".$searchTerm;
+       }
+       else {
+         $query = "SELECT * FROM Papers ORDER BY pr WHERE title LIKE '%".$searchTerm."%'";
+       }
+    }  
+    
+    
+    /* if there is not relevant papaer then show the wrong message to user*/
+    if (mysqli_num_fields($query) == 0){}
+    else{
+      throw new Exceotion ("There is no relevant paper to entered search criteria");
+    }
+       
+    
+    try{}
+    catch(Exception $e) {
+      echo 'Message : '. $e ->getMessage();
+    }
+       
+       
         ?>
   <header>
     <h4 class="text2">Project SciSearcher</h4>      
