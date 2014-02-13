@@ -5,18 +5,20 @@ import java.util.Arrays;
 public class pagerank {
 	private static double[][] paperMatrix;
 	private static double[] pageRanks;
+	private static int[] outboundCitations;
 
 	public static void main(String[] args) {
 		simMatrix();
 
 		pageRanks = new double[paperMatrix.length];
+		outboundCitations = new int[paperMatrix.length];
 
 		// init pageranks to 1
 		Arrays.fill(pageRanks, 1.0);
 		
 		// Fill outboundCitations
-		for (int i =0; i < outboundCitations.length; i++) {
-			
+		for (int i = 0; i < outboundCitations.length; i++) {
+			outboundCitations[i] = getOutboundCitation(i);
 		}
 
 		System.out.print("\nOutbound Citations \n");
@@ -35,30 +37,28 @@ public class pagerank {
 	private static void pageRank() {
 		double d = 0.8;
 		double culmativeRank = 0;
-		int counter = 0;
+
 		// for every pagerank
 		for (int i = 0; i<pageRanks.length; i++) {
 			culmativeRank = 0;
 			for (int paper : papersCiting(i)) {
-				counter++;
-				culmativeRank += pageRanks[paper] / outboundCitation(paper);
+				culmativeRank += pageRanks[paper] / outboundCitations[paper];
 			}
 			pageRanks[i] = (1 - d) + d*(culmativeRank);
 		}
-		System.out.println("iters " +counter);
 	}
 
-	private static double outboundCitation(int id) {
-		double count = 0;
+	private static int getOutboundCitation(int id) {
+		int citationCount = 0;
 
 		// Loop over array of citations
 		for (int row=0; row < paperMatrix.length; row++){
 			// Increment if citations exists. ( != 0 )
 			if (paperMatrix[row][id] > 0)
-				count++;
+				citationCount++;
 		}
 
-		return count;
+		return citationCount;
 	}
 
 	private static ArrayList<Integer> papersCiting (int id) {
@@ -74,7 +74,7 @@ public class pagerank {
 	// TESTING
 	private static void testOutboundCitations() {
 		for (int i = 0; i < paperMatrix.length; i++) {
-			System.out.println("Paper " + (i) + " has " + outboundCitation(i) + " outbound citations");
+			System.out.println("Paper " + (i) + " has " + outboundCitations[i] + " outbound citations");
 		}
 	}
 
