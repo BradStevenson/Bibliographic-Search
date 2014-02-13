@@ -24,17 +24,17 @@ public static void main(String[] args){
 
 
 public static int getNumberOfPapers(){ //not including marked deleted mails
-	//String sql = "Select Count(*) AS test FROM Papers";
-	//try {
-	//	ResultSet results = statement.executeQuery(sql);//execute statement
-	//		while(results.next()){
-	//			
+	String sql = "Select Count(*) AS test FROM Papers";
+	try {
+		ResultSet results = statement.executeQuery(sql);//execute statement
+			while(results.next()){
+				
 
-	//		return results.getInt("test");
-	//		}
-	//} catch (SQLException e) {
-	//	e.printStackTrace();
-	//}
+			return results.getInt("test");
+			}
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
 
 	
 	return 10;
@@ -71,49 +71,50 @@ public static void insertIntoGraph(){
 }
 
 public static int getnCites(int ID){
-	//String sql = "Select ncites from papers where paperID ='"+ID;
-	//int total = 0;
-	//try {
-	//	ResultSet results = statement.executeQuery(sql);//execute statement
-	//		results.next();
+	String sql = "Select ncites from papers where paperID ='"+ID;
+	int total = 0;
+	try {
+		ResultSet results = statement.executeQuery(sql);//execute statement
+			results.next();
 				 
-			return 3;
-			//return  results.getInt(1);
+		//	return 3;
+			return  results.getInt(1);
 			
-	//} catch (SQLException e) {
-	//	e.printStackTrace();
-	//}
-	//return 0;
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return 0;
 }
 
 
 
 public static ArrayList<Integer> citedPaperID(int ID){
 	// ADD CHECK FOR YEAR AND AUTHOR.
-	//String sql ="Select id FROM paper WHERE title = (Select title FROM citation WHERE paperid = "+ID+")";
+	String sql ="Select id FROM paper WHERE title = (Select title FROM citation WHERE paperid = "+ID+")";
 	ArrayList<Integer> citedPapers = new ArrayList<Integer>();
-	//int i=0;
-	//try {
-	//	ResultSet results = statement.executeQuery(sql);
-	//	while(results.next()){
-	//		citedPapers.add(results.getInt(i+1));
-	//	}
+	int i=0;
+	try {
+		ResultSet results = statement.executeQuery(sql);
+		while(results.next()){
+			citedPapers.add(results.getInt(i+1));
+		}
 		//results.absolute(num);
 
-	//		return citedPapers;
+		return citedPapers;
 			
-	//} catch (SQLException e) {
-	//	e.printStackTrace();
-	//}
-//
-	//return null;
-	citedPapers.add(2);
-	citedPapers.add(3);
-	citedPapers.add(4);
-	citedPapers.add(5);
-	citedPapers.add(7);
-	citedPapers.add(9);
-	return citedPapers;
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+
+	return null;
+	//test data
+	//citedPapers.add(2);
+	//citedPapers.add(3);
+	//citedPapers.add(4);
+	//citedPapers.add(5);
+	//citedPapers.add(7);
+	//citedPapers.add(9);
+	//return citedPapers;
 }
 }
 
