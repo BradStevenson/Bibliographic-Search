@@ -1,8 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.ListIterator;
-import java.util.Iterator;
-import java.util.Vector;
 
 
 public class pagerank {
@@ -16,6 +13,11 @@ public class pagerank {
 
 		// init pageranks to 1
 		Arrays.fill(pageRanks, 1.0);
+		
+		// Fill outboundCitations
+		for (int i =0; i < outboundCitations.length; i++) {
+			
+		}
 
 		System.out.print("\nOutbound Citations \n");
 
@@ -24,24 +26,26 @@ public class pagerank {
 		System.out.print("\nPapers Citing \n");
 
 		testpapersCiting();
-		
+
 		System.out.print("\nPage Rank \n");
-		
+
 		testPageRank();
 	}
 
 	private static void pageRank() {
 		double d = 0.8;
 		double culmativeRank = 0;
-
+		int counter = 0;
 		// for every pagerank
 		for (int i = 0; i<pageRanks.length; i++) {
 			culmativeRank = 0;
 			for (int paper : papersCiting(i)) {
+				counter++;
 				culmativeRank += pageRanks[paper] / outboundCitation(paper);
 			}
 			pageRanks[i] = (1 - d) + d*(culmativeRank);
 		}
+		System.out.println("iters " +counter);
 	}
 
 	private static double outboundCitation(int id) {
