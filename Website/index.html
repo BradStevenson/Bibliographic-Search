@@ -7,8 +7,22 @@
 			<h4 class="text2">Project</h4>
 			<h1 class="text">SciSearcher</h1>
 			<form action="results.php" method="GET">
-				<input type="text" name="search" class="round" placeholder="Enter search criteria here."/>
+				<input type="text" name="search" class="round" placeholder="Title:"/>
 				<button type="submit" class="button">Search</button>
+				<br>
+				<br>
+				<br>
+				<br>
+				<div class="searchTypes">
+					<input type="radio" name="searchOptions" id="Title" />
+						<label for="Title">Title</label>
+					<input type="radio" name="searchOptions" id="Year"/>
+						<label for="Year">Year</label>
+					<input type="radio" name="searchOptions" id="Author"/>
+						<label for="Author">Author</label>
+					<input type="radio" name="searchOptions" id="Field"/>
+						<label for="Field">Field</label>
+				</div>
 			</form>
 		</section>
 		<footer>
