@@ -32,14 +32,22 @@
     /* Tiffany here  modify the line from 23 - 28*/
     
     $searchTerm = $_GET["search"];
-    if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
+    if (preg_match("Year", $searchTerm, $matches)) {
       $query = "SELECT * FROM Papers ORDER BY pr WHERE year =". $searchTerm; // pr is the pagerank of the paper however i have not create this varaible yet, just used
     } else {
-       if (var_dump( $searchTerm > "/^[0-9]{4}$/")) {
-         $query =  "SELECT Authors.name FROM Author ORDER BY pr WHERE Authors.paperid = ".$searchTerm;
+       if (preg_match("Author", $searchTerm, $matches)) {
+         $query =  "SELECT * FROM Papers ORDER BY pr WHERE Paper.id = SELECT Authors.paperid FROM Authors WHERE Authors.name = ".$searchTerm;
        }
-       else {
-         $query = "SELECT * FROM Papers ORDER BY pr WHERE title LIKE '%".$searchTerm."%'";
+       else 
+         {
+          if (preg_match("Title", $searchTerm, $matches)) {
+         $query = "SELECT * FROM Papers ORDER BY pr WHERE title =" .$searchTerm;
+          }
+          else{
+             if (preg_match("Field", $searchTerm, $matches)) {
+          
+          $query = "SELECT * FROM ";
+          }
        }
     }  
     
