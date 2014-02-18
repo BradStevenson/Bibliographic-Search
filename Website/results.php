@@ -32,25 +32,23 @@
     /* Tiffany here  modify the line from 23 - 28*/
     
     $searchTerm = $_GET["search"];
-    if (preg_match("Year", $searchTerm, $matches)) {
-      $query = "SELECT * FROM Papers ORDER BY pr WHERE year =". $searchTerm; // pr is the pagerank of the paper however i have not create this varaible yet, just used
-    } else {
-       if (preg_match("Author", $searchTerm, $matches)) {
-         $query =  "SELECT * FROM Papers ORDER BY pr WHERE Paper.id = SELECT Authors.paperid FROM Authors WHERE Authors.name = ".$searchTerm;
-       }
-       else 
-         {
-          if (preg_match("Title", $searchTerm, $matches)) {
-         $query = "SELECT * FROM Papers ORDER BY pr WHERE title =" .$searchTerm;
-          }
-          else{
-             if (preg_match("Field", $searchTerm, $matches)) {
-          
-          $query = "SELECT * FROM ";
-          }
-       }
-    }  
-    
+    $option = $_REQUEST["submit"];
+    swtich ($option){
+      case "Title":
+        $query = "SELECT * FROM Papers ORDER BY pr WHERE title =" .$searchTerm;
+        break;
+      case "Year" :
+        $query = "SELECT * FROM Papers ORDER BY pr WHERE year =". $searchTerm; 
+        break;
+      case "Author" :
+        $query =  "SELECT * FROM Papers ORDER BY pr WHERE Paper.id = SELECT Authors.paperid FROM Authors WHERE Authors.name = ".$searchTerm;
+        break;
+      case "Field" :
+        $query = "SELECT * FROM papers ORDER BY pr WHERE papers.field = " .$searchTerm;
+    }
+   
+   
+   
     
     /* if there is not relevant papaer then show the wrong message to user*/
     if (mysqli_num_fields($query) == 0){}
