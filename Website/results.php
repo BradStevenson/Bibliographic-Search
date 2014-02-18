@@ -32,8 +32,10 @@
     /* Tiffany here  modify the line from 23 - 28*/
     
     $searchTerm = $_GET["search"];
-    $option = $_REQUEST["submit"];
-    swtich ($option){
+    $searchOptions = $_REQUEST["submit"];
+    $aaa = test_input($_GET["Title"]);
+    
+    swtich ($searchOptions){
       case "Title":
         $query = "SELECT * FROM Papers ORDER BY pr WHERE title =" .$searchTerm;
         break;
@@ -61,9 +63,20 @@
     catch(Exception $e) {
       echo 'Message : '. $e ->getMessage();
     }
-       
+    
+    function test_input($data)
+{
+   $data = trim($data);
+   $data = stripslashes($data);
+   $data = htmlspecialchars($data);
+   return $data;
+}   
        
         ?>
+        <?php
+echo "<h2>Your Input:</h2>";
+echo $aaa;
+?>
   <header>
     <h4 class="text2">Project SciSearcher</h4>      
     <form action="results.php" method="GET">
