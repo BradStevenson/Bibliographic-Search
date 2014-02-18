@@ -32,8 +32,8 @@
     /* Tiffany here  modify the line from 23 - 28*/
     
     $searchTerm = $_GET["search"];
-    $searchOptions = $_REQUEST["submit"];
-    $aaa = test_input($_GET["Title"]);
+    $searchOptions = $_GET["submit"];
+    
     
     swtich ($searchOptions){
       case "Title":
