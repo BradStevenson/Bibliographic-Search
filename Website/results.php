@@ -64,19 +64,8 @@
       echo 'Message : '. $e ->getMessage();
     }
     
-    function test_input($data)
-{
-   $data = trim($data);
-   $data = stripslashes($data);
-   $data = htmlspecialchars($data);
-   return $data;
-}   
-       
         ?>
-        <?php
-echo "<h2>Your Input:</h2>";
-echo $aaa;
-?>
+
   <header>
     <h4 class="text2">Project SciSearcher</h4>      
     <form action="results.php" method="GET">
