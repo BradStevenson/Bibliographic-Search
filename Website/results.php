@@ -66,6 +66,8 @@
     
         ?>
 
+
+  /** Tiffany modify here **/
   <header>
     <h4 class="text2">Project SciSearcher</h4>      
     <form action="results.php" method="GET">
@@ -79,11 +81,13 @@
                 if ($result = $mysqli->query($query)) {
             while ($row = $result->fetch_row()) {
               echo "<tr>";
-              echo "<div id='result'><span id='title'>".$row[1].
+              echo "<div id='result'><span class = "underline"><span id='title'>".$row[1].
              "</span><span id='author'>".$row[2].
              "</span><span id='year'>".$row[3].
+             "</span><span id = 'field'".$row[4].
              "</span></div>";
               echo "</tr>";
+              echo "<br>";
               $numRows++;
             }
             /* free result set */
