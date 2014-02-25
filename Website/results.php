@@ -37,25 +37,25 @@
     
     swtich ($searchOptions){
       case "Title":
-        $query = "SELECT * FROM Papers ORDER BY pr WHERE title =" .$searchTerm;
+        $query = "SELECT * FROM Papers ORDER BY pr WHERE title = '".$searchTerm."';";
         break;
       case "Year" :
-        $query = "SELECT * FROM Papers ORDER BY pr WHERE year =". $searchTerm; 
+        $query = "SELECT * FROM Papers ORDER BY pr WHERE year = '".$searchTerm."';"; 
         break;
       case "Author" :
-        $query =  "SELECT * FROM Papers ORDER BY pr WHERE Paper.id = SELECT Authors.paperid FROM Authors WHERE Authors.name = ".$searchTerm;
+        $query =  "SELECT * FROM Papers ORDER BY pr WHERE Paper.id = SELECT Authors.paperid FROM Authors WHERE Authors.name = '".$searchTerm."';";
         break;
       case "Field" :
-        $query = "SELECT * FROM papers ORDER BY pr WHERE papers.field = " .$searchTerm;
+        $query = "SELECT * FROM papers ORDER BY pr WHERE papers.field = '".$searchTerm."';";
     }
    
    
    
     
-    /* if there is not relevant papaer then show the wrong message to user*/
+    /* if there is not relevant paper then show the wrong message to user*/
     if (mysqli_num_fields($query) == 0){}
     else{
-      throw new Exceotion ("There is no relevant paper to entered search criteria");
+      throw new Exception ("There is no relevant paper to entered search criteria");
     }
        
     
