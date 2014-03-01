@@ -1,0 +1,44 @@
+body {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	background-image:url('escheresque_ste.png');
+	font-family: 'Open Sans', sans-serif;
+	color: white;
+	width: 100%;
+}
+
+header {
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+	margin-bottom: 50px;
+}
+
+.form-control {
+	width: 50%;
+	display: inline;
+}
+
+.btn {
+	width: 10%;
+}
+
+.container {
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+table {
+	width: 40%;
+}
+
+.row {
+	margin-top: 20px;
+	margin-bottom: 50px;
+}
+
+td {
+	border-top: thin solid white;
+}
