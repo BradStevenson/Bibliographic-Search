@@ -5,7 +5,7 @@ body {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	background-image:url('escheresque_ste.png');
+	background-color: #303030;
 	font-family: 'Open Sans', sans-serif;
 }
 
@@ -84,3 +84,4 @@ footer p {
 	width: 500px;
 	height: 1px;
 }
+
