@@ -16,7 +16,7 @@ header {
 }
 
 .form-control {
-	width: 50%;
+	width: 60%;
 	display: inline;
 }
 
@@ -31,14 +31,11 @@ header {
 }
 
 table {
-	width: 40%;
+	width: 50%;
 }
 
 .row {
-	margin-top: 20px;
+	margin-top: -5px;
 	margin-bottom: 50px;
 }
 
-td {
-	border-top: thin solid white;
-}

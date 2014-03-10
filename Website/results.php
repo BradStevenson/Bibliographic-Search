@@ -14,8 +14,7 @@
     $time = $time[1] + $time[0];
     $start = $time;
     
-    // NEED TO MAKE A USER FOR QUERIES. CAN'T LEAVE AS ROOT.
-    $mysqli = new mysqli("sproj08.cs.nott.ac.uk", "root", "mNNhv13uBB", "SciSearcher");
+    $mysqli = new mysqli("mysql.cs.nott.ac.uk", "gp13_pkl", "CVNFTW", "gp13_pkl");
     /* check connection */
     if (mysqli_connect_errno()) {
         echo "Connect failed: ".mysqli_connect_error();
