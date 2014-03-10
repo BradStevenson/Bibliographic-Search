@@ -2,7 +2,11 @@
 <html>
 <head>
   <title>Results</title>
-  <link rel="stylesheet" type="text/css" href="results-style.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/results-style.css">
+    <script type="text/javascript" src="jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
 </head>
 <body>
        <?php
@@ -14,7 +18,7 @@
     $time = $time[1] + $time[0];
     $start = $time;
     
-    $mysqli = new mysqli("mysql.cs.nott.ac.uk", "gp13_pkl", "CVNFTW", "gp13_pkl");
+    $mysqli = new mysqli("sproj09.cs.nott.ac.uk", "root", "mNNhv13uBB", "SciSearcher");
     /* check connection */
     if (mysqli_connect_errno()) {
         echo "Connect failed: ".mysqli_connect_error();
@@ -26,10 +30,6 @@
     } else {
       $query = "SELECT * FROM Papers WHERE title LIKE '%".$searchTerm."%'";
     }
-    
-    
-    
-    /* Tiffany here  modify the line from 23 - 28*/
     
     $searchTerm = $_GET["search"];
     $searchOptions = $_GET["submit"];
@@ -80,12 +80,13 @@
         $numRows = 0;
                 if ($result = $mysqli->query($query)) {
             while ($row = $result->fetch_row()) {
-              echo "<tr>";
-              echo "<div id='result'><span class = "underline"><span id='title'>".$row[1].
-             "</span><span id='author'>".$row[2].
-             "</span><span id='year'>".$row[3].
-             "</span><span id = 'field'".$row[4].
-             "</span></div>";
+              echo "<tr class="result">";
+              echo "<div><span id="title"><u><h4><font size="5" onMouseOver="$(this).tooltip('show')" data-toggle="tooltip" title="
+Abstract: lalalalalalalalalalalalalallalaalalalallalalalalalalalalallalalalalalalallala
+lala..." data-placement="right"> Name of the article: </font></h4></u></span></div>".$row[1].
+             "<div class="col-md-3"><span id="author">Author： ".$row[2]."</span></div>".
+             "<div class="col-md-3"><span id="field">Year： ".$row[3]."</span></div>".
+             "<div class="col-md-3"><span id="year">Field： ".$row[4]."</span></div>";
               echo "</tr>";
               echo "<br>";
               $numRows++;
