@@ -1,43 +1,42 @@
+package citations;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-
-public class pagerank {
-	private static double[][] paperMatrix;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.text.DecimalFormat;
+public class pagerank2 {
 	private static double[] pageRanks;
 	private static int[] outboundCitations;
-
+	public static int maxPapers;
+	static Statement statement;
 	public static void main(String[] args) {
-		simMatrix();
-
-		pageRanks = new double[paperMatrix.length];
-		outboundCitations = new int[paperMatrix.length];
-
+		//simMatrix();
+		
+		// HOW MANY PAPERS
+		
+		maxPapers = getNumberOfPapers();
+		pageRanks = new double[maxPapers];
+		outboundCitations = new int[maxPapers];
 		// init pageranks to 1
 		Arrays.fill(pageRanks, 1.0);
-		
 		// Fill outboundCitations
 		for (int i = 0; i < outboundCitations.length; i++) {
 			outboundCitations[i] = getOutboundCitation(i);
 		}
-
 		System.out.print("\nOutbound Citations \n");
-
-		testOutboundCitations();
-
+		//testOutboundCitations();
 		System.out.print("\nPapers Citing \n");
-
-		testpapersCiting();
-
+		//testpapersCiting();
 		System.out.print("\nPage Rank \n");
-
-		testPageRank();
+		//testPageRank();
 	}
-
 	private static void pageRank() {
 		double d = 0.8;
 		double culmativeRank = 0;
-
 		// for every pagerank
 		for (int i = 0; i<pageRanks.length; i++) {
 			culmativeRank = 0;
@@ -47,139 +46,105 @@ public class pagerank {
 			pageRanks[i] = (1 - d) + d*(culmativeRank);
 		}
 	}
-
 	private static int getOutboundCitation(int id) {
 		int citationCount = 0;
-
-		// Loop over array of citations
-		for (int row=0; row < paperMatrix.length; row++){
-			// Increment if citations exists. ( != 0 )
-			if (paperMatrix[row][id] > 0)
-				citationCount++;
-		}
-
+		
+		// MYSQL QUERY FIND HOW MANY CITATIONS
+			String sql = "Select ncites from papers where paperID ='"+id;
+			try {
+				ResultSet results = statement.executeQuery(sql);//execute statement
+					results.next();
+						 
+				//return 3;
+					return  results.getInt(1);
+					
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		return citationCount;
 	}
-
+	public static int getNumberOfPapers(){ //not including marked deleted mails
+		//String sql = "Select Count(*) AS test FROM Papers";
+		//try {
+		//	ResultSet results = statement.executeQuery(sql);//execute statement
+		//		while(results.next()){
+					
+		//		return results.getInt("test");
+		//		}
+		//} catch (SQLException e) {
+		//	e.printStackTrace();
+		//}
+		
+		return 3000000;
+	}	
+	
+	private static String getAuthor(int id) {
+		String sql ="SELECT authors FROM papers WHERE id ="+id+"";
+		try {
+			ResultSet results = statement.executeQuery(sql);
+			results.next();
+			return results.getString(1);
+			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private static String getTitle(int id) {
+		String sql ="SELECT title FROM papers WHERE id ="+id+"";
+		try {
+			ResultSet results = statement.executeQuery(sql);
+			results.next();
+			return results.getString(1);
+			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private static int getYear(int id) {
+		String sql ="SELECT year FROM papers WHERE id ="+id+"";
+		try {
+			ResultSet results = statement.executeQuery(sql);
+			results.next();
+			return results.getInt(1);
+			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
 	private static ArrayList<Integer> papersCiting (int id) {
+		// find every paperID that cites our id parameter
 		ArrayList<Integer> citesArray = new ArrayList<Integer>();
+		int paperid=0;
+		String sql ="SELECT id FROM papers "
+				+ "WHERE authors = (SELECT authors FROM citations WHERE authors = "+getAuthor(id)+") "
+				+ "AND title = (SELECT title FROM citations WHERE title = "+getTitle(id)+" "
+				+ "AND year = (SELECT year FROM citations WHERE year = "+getYear(id)+")";
+		try {
+			ResultSet results = statement.executeQuery(sql);
+			while(results.next())
+			paperid = results.getInt("id");
+			citesArray.add(paperid);
 
-		for (int column=0; column < paperMatrix[id].length; column++){
-			if (paperMatrix[id][column] > 0)
-				citesArray.add(column);
+			}
+		catch (SQLException e) {
+			e.printStackTrace();
 		}
+		// get title, author, year of id
+		
+		// pass this into search for papers
+		
+		// append results into our array
+		
+		// return array
 		return citesArray;
-	}
-
-	// TESTING
-	private static void testOutboundCitations() {
-		for (int i = 0; i < paperMatrix.length; i++) {
-			System.out.println("Paper " + (i) + " has " + outboundCitations[i] + " outbound citations");
-		}
-	}
-
-	private static void testpapersCiting() {
-		for (int i = 0; i < paperMatrix.length; i++) {
-			//ArrayList<Integer> papers = papersCiting(i);
-			// loop over papers, print i then all elements in papers
-			System.out.println("Paper " + (i) + " was cited by papers " + papersCiting(i));
-		}
-	}
-
-	private static void testPageRank() {
-		for (int i = 0; i < 20; i++) {
-			pageRank();	
-		}
-		double totalRank = 0;
-		for (int i = 0; i < pageRanks.length; i++) {
-			totalRank += pageRanks[i];
-			System.out.println("Paper " + (i) + "'s page rank is " + pageRanks[i]);
-		}
-		System.out.println("\nCulmative Ranking is " + totalRank + " should be " + pageRanks.length);
-	}
-
-	private static void simMatrix() {
-		paperMatrix = new double[8][8];
-
-		// Row 1
-		paperMatrix[0][0] = 0;
-		paperMatrix[0][1] = 0;
-		paperMatrix[0][2] = 0;
-		paperMatrix[0][3] = 0;
-		paperMatrix[0][4] = 0;
-		paperMatrix[0][5] = 0;
-		paperMatrix[0][6] = 0;
-		paperMatrix[0][7] = 0;
-
-		// Row 2
-		paperMatrix[1][0] = 1.0/2.0;
-		paperMatrix[1][1] = 0;
-		paperMatrix[1][2] = 1.0/2.0;
-		paperMatrix[1][3] = 1.0/3.0;
-		paperMatrix[1][4] = 0;
-		paperMatrix[1][5] = 0;
-		paperMatrix[1][6] = 0;
-		paperMatrix[1][7] = 0;
-
-		// Row 3
-		paperMatrix[2][0] = 1.0/2.0;
-		paperMatrix[2][1] = 0;
-		paperMatrix[2][2] = 0;
-		paperMatrix[2][3] = 0;
-		paperMatrix[2][4] = 0;
-		paperMatrix[2][5] = 0;
-		paperMatrix[2][6] = 0;
-		paperMatrix[2][7] = 0;
-
-		// Row 4
-		paperMatrix[3][0] = 0;
-		paperMatrix[3][1] = 1.0;
-		paperMatrix[3][2] = 0;
-		paperMatrix[3][3] = 0;
-		paperMatrix[3][4] = 0;
-		paperMatrix[3][5] = 0;
-		paperMatrix[3][6] = 0;
-		paperMatrix[3][7] = 0;
-
-		// Row 5
-		paperMatrix[4][0] = 0;
-		paperMatrix[4][1] = 0;
-		paperMatrix[4][2] = 1.0/2.0;
-		paperMatrix[4][3] = 1.0/3.0;
-		paperMatrix[4][4] = 0;
-		paperMatrix[4][5] = 0;
-		paperMatrix[4][6] = 1.0/2.0;
-		paperMatrix[4][7] = 0;		
-
-
-		// Row 6
-		paperMatrix[5][0] = 0;
-		paperMatrix[5][1] = 0;
-		paperMatrix[5][2] = 0;
-		paperMatrix[5][3] = 1.0/3.0;
-		paperMatrix[5][4] = 1.0/3.0;
-		paperMatrix[5][5] = 0;
-		paperMatrix[5][6] = 0;
-		paperMatrix[5][7] = 1.0/2.0;
-
-		// Row 7
-		paperMatrix[6][0] = 0;
-		paperMatrix[6][1] = 0;
-		paperMatrix[6][2] = 0;
-		paperMatrix[6][3] = 0;
-		paperMatrix[6][4] = 1.0/3.0;
-		paperMatrix[6][5] = 0;
-		paperMatrix[6][6] = 0;
-		paperMatrix[6][7] = 1.0/2.0;
-
-		// Row 8
-		paperMatrix[7][0] = 0;
-		paperMatrix[7][1] = 0;
-		paperMatrix[7][2] = 0;
-		paperMatrix[7][3] = 0;
-		paperMatrix[7][4] = 1.0/3.0;
-		paperMatrix[7][5] = 1.0;
-		paperMatrix[7][6] = 1.0/2.0;
-		paperMatrix[7][7] = 0;		
 	}
 }
