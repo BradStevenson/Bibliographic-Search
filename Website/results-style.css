@@ -8,59 +8,87 @@ body {
 }
 
 header {
-	width: 80%;
+	max-width: 768px;
+	width: 100%;
 	margin: 20px 10%;
 }
 
-header .pageTitle {
-	font-size: 5em;
-	margin-bottom: 40px;
+header .pageTitle1 {
+	font-size: 1.2em;
+	margin-bottom: 0;
 	font-weight: 100;
+	color: #606060;
+}
+header .pageTitle2 {
+	font-size: 3em;
+	margin-top: 6px;
+	margin-bottom: 20px;
+	font-weight: 200;
 }
 
 header form {
-	margin: 20px 10px;
+	margin: 20px 0px;
 }
 
 header form input[type='text'] {
-	width: 650px;
+	width: calc(100% - 100px);
 	height: 40px;
 	border: 1px solid #e0e0e0;
+	border-right: none;
 	padding-left: 20px;
 }
 
 header form button {
 	height: 40px;
 	width: 100px;
-	background-color: #e0e0e0;
+	background-color: #2376FF;
+	color: white;
 	border: none;
+	font-weight: 800;
+	margin-left: -4px;
+}
+
+header form .searchOptions {
+	width:754px;
+}
+
+header form input[type='radio'] {
+	display: none;
+}
+
+header form input[type='radio'] + label {
+	display: inline-block;
+	text-align: center;
+	width: 80px;
+	padding: 20px 0 10px 0;
+	background-color: #FFF;
+	margin-right: 10px;
+	color: #303030;
+	font-weight: 300;
+	border-bottom: solid 2px #e0e0e0;
+}
+
+header form input[type='radio'] + label:hover {
+	cursor: pointer;
+}
+
+header form input[type = 'radio']:checked + label {
+	color: #2376FF;
+	border-bottom: solid 2px #2376FF;
+	border-top: solid 1px #2376FF;
+	margin-top: -1px;
 	font-weight: 800;
 }
 
 #count {
-	width: 80%;
-	margin: 0 10%;
-	max-width: 768px;
-	padding-left: 10px;
-	color: #999;
+	float: right;
+	margin: 20px 0 10px 0;
+	color: #c0c0c0;
+	font-size: 12px;
 	font-weight: 100;
 }
 
-/*
-.form-control {
-	width: 60%;
-	display: inline;
-}
 
-.btn {
-	width: 10%;
-}
-
-.container {
-	width: 75%;
-	margin-right: auto;
-	margin-left: auto;
-}*/
 
 table {
 	width: 80%;
@@ -77,6 +105,8 @@ table {
 		font-weight: 300;
 		font-size: 1.5em;
 		color: #2376FF;		
+		margin: 20px 0 10px;
+		display: block;
 	}
 	.result .resultInfo p {
 		display: inline-block;
@@ -92,12 +122,13 @@ table {
 	.result .abstract {
 		color: #101010;
 		font-weight: 100;
+		margin-left: 10px;
+		margin-right: 10px;
 	}
 	.result .placeholder {
 		color:#999;
 		font-style: italic;
 		font-weight: 100;
-		margin-left: 10px;
 	}
 
 /*.abstract {
@@ -105,25 +136,3 @@ table {
 	right: 10px;
 	display: none;
 }*/
-
-footer {
-	background-color: #2376FF;
-	height: 40px;
-	width: 100%;
-	position: fixed;
-	bottom: 0;
-}
-
-footer p {
-	color: #9ecaed;
-	position: relative;
-	font-size: 15px;
-	font-family: Arial;
-	display: block;
-	width: 100px;
-	height: 60px;
-	margin: 0px;
-	text-align: center;
-	padding-top: 10px;
-	color: #FFFFFF;
-}
