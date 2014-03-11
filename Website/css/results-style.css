@@ -39,6 +39,10 @@ table {
 	margin-bottom: 50px;
 }
 
+.result {
+	background-color: grey;
+}
+
 .abstract {
 	position: fixed;
 	right: 10px;

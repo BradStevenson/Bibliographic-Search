@@ -1,0 +1,22 @@
+TEST CASES
+====================================================================
+
+1. Invalid search query
+	1.1 Type in a year that doesn't exist in the database
+	1.2 Type in 1 letter 
+
+2. Information displayed too long
+	2.1 Example text is 5 lines at most with read more capability
+	2.2 (Optional)Venue reduced to 30 characters
+
+3. Results display time works correctly to fit requirements
+
+4. User can choose between 10 or 20 results
+
+5. Displays total number of results found
+
+6. No results are found
+
+7. If empty string for a value then display empty message
+
+8. Mutiple search criteria entered, displays message

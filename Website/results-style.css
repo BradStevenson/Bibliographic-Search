@@ -1,0 +1,129 @@
+body {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	font-family: 'Segoe UI', sans-serif;
+	color: #101010;
+	width: 100%;
+}
+
+header {
+	width: 80%;
+	margin: 20px 10%;
+}
+
+header .pageTitle {
+	font-size: 5em;
+	margin-bottom: 40px;
+	font-weight: 100;
+}
+
+header form {
+	margin: 20px 10px;
+}
+
+header form input[type='text'] {
+	width: 650px;
+	height: 40px;
+	border: 1px solid #e0e0e0;
+	padding-left: 20px;
+}
+
+header form button {
+	height: 40px;
+	width: 100px;
+	background-color: #e0e0e0;
+	border: none;
+	font-weight: 800;
+}
+
+#count {
+	width: 80%;
+	margin: 0 10%;
+	max-width: 768px;
+	padding-left: 10px;
+	color: #999;
+	font-weight: 100;
+}
+
+/*
+.form-control {
+	width: 60%;
+	display: inline;
+}
+
+.btn {
+	width: 10%;
+}
+
+.container {
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+}*/
+
+table {
+	width: 80%;
+	margin: 0 10%;
+	max-width: 768px;
+}
+
+.result {
+	padding: 0 10px 10px;
+	border-bottom: solid 1px #e0e0e0;
+}
+
+	.result .title {
+		font-weight: 300;
+		font-size: 1.5em;
+		color: #2376FF;		
+	}
+	.result .resultInfo p {
+		display: inline-block;
+		padding-right: 20px;
+		font-weight: 800;
+	}
+	.result .author {
+		color: #202020;
+	}
+	.result .year {
+		color: #202020;
+	}
+	.result .abstract {
+		color: #101010;
+		font-weight: 100;
+	}
+	.result .placeholder {
+		color:#999;
+		font-style: italic;
+		font-weight: 100;
+		margin-left: 10px;
+	}
+
+/*.abstract {
+	position: fixed;
+	right: 10px;
+	display: none;
+}*/
+
+footer {
+	background-color: #2376FF;
+	height: 40px;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+}
+
+footer p {
+	color: #9ecaed;
+	position: relative;
+	font-size: 15px;
+	font-family: Arial;
+	display: block;
+	width: 100px;
+	height: 60px;
+	margin: 0px;
+	text-align: center;
+	padding-top: 10px;
+	color: #FFFFFF;
+}
