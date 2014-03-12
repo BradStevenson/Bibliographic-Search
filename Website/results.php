@@ -5,6 +5,29 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="results-style.css">
+  <script src='jquery-2.1.0.min.js'></script>
+  <script type="text/javascript">
+  $(window).scroll(function(e) {
+      var scroller_anchor = $(".scroller_anchor").offset().top;
+       
+      if ($(this).scrollTop() >= scroller_anchor && $('.scroller').css('position') != 'fixed')
+          $('.scroller').css({
+              'background': 'rgba(255,255,255,0.95)',
+              'position': 'fixed',
+              'top': '0px'
+          });
+          $('.scroller_anchor').css('height', '50px');
+      }
+      else if ($(this).scrollTop() < scroller_anchor && $('.scroller').css('position') != 'relative')
+          $('.scroller_anchor').css('height', '0px');
+        
+          $('.scroller').css({
+              'background': '#FFF',
+              'position': 'relative'
+          });
+      }
+  });
+  </script>
 </head>
 <body>
        <?php
@@ -64,8 +87,10 @@
 
   <header>
     <h2 class="pageTitle1">Project</h2>
-    <h1 class="pageTitle2">SciSearcher</h4>      
-    <form action="results.php" method="GET">
+    <h1 class="pageTitle2">SciSearcher</h4> 
+
+    <div class="scroller_anchor"></div>
+    <form action="results.php" method="GET" class="scroller">
       <input type="text" name="search" class="round" value="<?php echo $searchTerm ?>"/>
       <button type="submit" class="button">Search</button>
     <div class="searchOptions">
