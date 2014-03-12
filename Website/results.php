@@ -10,7 +10,7 @@
   $(window).scroll(function(e) {
       var scroller_anchor = $(".scroller_anchor").offset().top;
        
-      if ($(this).scrollTop() >= scroller_anchor && $('.scroller').css('position') != 'fixed')
+      if ($(this).scrollTop() >= scroller_anchor && $('.scroller').css('position') != 'fixed') {
           $('.scroller').css({
               'background': 'rgba(255,255,255,0.95)',
               'position': 'fixed',
@@ -18,9 +18,9 @@
           });
           $('.scroller_anchor').css('height', '50px');
       }
-      else if ($(this).scrollTop() < scroller_anchor && $('.scroller').css('position') != 'relative')
+      else if ($(this).scrollTop() < scroller_anchor && $('.scroller').css('position') != 'relative') {
           $('.scroller_anchor').css('height', '0px');
-        
+
           $('.scroller').css({
               'background': '#FFF',
               'position': 'relative'
