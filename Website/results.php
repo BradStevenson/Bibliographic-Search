@@ -146,8 +146,7 @@
 		      	$resultsHTML .= "<td  class='result'>";
           	$resultsHTML .= "<a class='title' href='".$row[0]."'>".$row[1]."</a>";
             $resultsHTML .= "<div class='resultInfo'>";
-            $resultsHTML .= "<p class='author'>".$row[3]."</p>";
-            $resultsHTML .= "<p class='year'>".$row[2]."</p>";
+            $resultsHTML .= "<p class='author'>By ".$row[3].", ".$row[2]."</p>";
             $resultsHTML .= "</div>";
             if ($row[4] == ' ') {
               $resultsHTML .= "<p class='abstract'><span class='placeholder'>No abstract available.</span></p>";
@@ -172,7 +171,7 @@
 
     $sizeResult = $mysqli->query($querySize);
     $size = $sizeResult->fetch_row();
-    echo "<div id='count'>".$numRows." matches of ".$size[0]." in ".$total_time." seconds</div>";
+    echo "<div id='count'>".$size[0]." matches in ".$total_time." seconds</div>";
     $sizeResult->close();
     $mysqli->close();
     echo "</div>";

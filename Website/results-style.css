@@ -34,6 +34,7 @@ header .scroller_anchor{
 header form {
 	margin: 0px 0px 20px;
 	padding-top: 12px;
+	width: 768px;
 }
 
 header form input[type='text'] {
@@ -93,7 +94,7 @@ header form input[type = 'radio']:checked + label {
 #count {
 	float: right;
 	margin: 20px 0 10px 0;
-	color: #c0c0c0;
+	color: #999;
 	font-size: 12px;
 	font-weight: 100;
 }
@@ -112,7 +113,6 @@ table {
 }
 
 	.result .title {
-		font-weight: 300;
 		font-size: 1.5em;
 		color: #2376FF;		
 		margin: 20px 0 10px;
