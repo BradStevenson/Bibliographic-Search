@@ -5,6 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="results-style.css">
+  <script src='jquery-2.1.0.min.js'></script>
   <script src='jstmt-2.1.0.min.js'></script>
   <script type="text/javascript">
   $(window).scroll(function(e) {
