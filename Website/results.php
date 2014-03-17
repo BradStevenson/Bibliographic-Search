@@ -175,6 +175,7 @@
     // $stmtSize->bind_result($size);
     // $stmtSize->fetch();
     // echo "<div id='count'>".$size." matches in ".$total_time." seconds</div>";
+    echo "<div id='count'>(".$total_time." seconds)</div>";
     // $stmtSize->close();
     $mysqli->close();
     echo "</div>";
