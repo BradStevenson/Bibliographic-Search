@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="results-style.css">
-  <script src='jquery-2.1.0.min.js'></script>
+  <script src='jstmt-2.1.0.min.js'></script>
   <script type="text/javascript">
   $(window).scroll(function(e) {
       var scroller_anchor = $(".scroller_anchor").offset().top;
@@ -30,7 +30,7 @@
   </script>
 </head>
 <body>
-       <?php
+  <?php
     ini_set('display_errors', 'On');
     error_reporting(E_ALL);
 
@@ -39,77 +39,86 @@
     $time = $time[1] + $time[0];
     $start = $time;
     
-    $mysqli = new mysqli("localhost", "root", "mNNhv13uBB", "SciSearcher");
+    $mysqli = new mysqli("localhost", "searchQueries", "superhardpassword", "SciSearcher");
     /* check connection */
     if (mysqli_connect_errno()) {
         echo "Connect failed: ".mysqli_connect_error();
     }
 
-    $searchTerm = $_GET["search"];
+    $searchTerm = $_POST["search"];
     
-    if(isset($_GET["searchType"])){
-      $searchType = $_GET["searchType"];
+    $selectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
+    $keywordSelectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT 10;";
+
+    if(isset($_POST["searchType"])) {
+      $searchType = $_POST["searchType"];
 
       switch ($searchType){
-        case "keyword":
-          $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls, keywords WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.id=keywords.paperid AND keywords.keyword LIKE '%".$searchTerm."%' group by papers.title LIMIT 10;";
-          $querySize = "SELECT COUNT(*) FROM keywords WHERE keyword LIKE '%".$searchTerm."%'";
-          break;
-        case "title":
-          $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.title LIKE '%".$searchTerm."%' group by papers.title LIMIT 10;";
-          $querySize = "SELECT COUNT(*) FROM papers WHERE title LIKE '%".$searchTerm."%'";
+        case "paper":
+          $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $stmt = $mysqli->prepare($query);
+		  $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers INNER JOIN keywords ON papers.id=keywords.paperid WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)");
           break;
         case "year" :
-          $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = '".$searchTerm."' group by papers.title LIMIT 10;";      
-          $querySize = "SELECT COUNT(*) FROM papers WHERE year = '".$searchTerm."'";
+          $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");      
+          $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers WHERE year = ?");
           break;
         case "author" :
-          $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND authors.name LIKE '%".$searchTerm."%'  group by papers.title LIMIT 10;";
-          $querySize = "SELECT COUNT(*) FROM authors WHERE name LIKE '%".$searchTerm."%'";
-          break;
-        case "field" :
-          $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND field LIKE '%".$searchTerm."%' LIMIT 10;";
-          $querySize = "SELECT COUNT(*) FROM papers WHERE field LIKE '%".$searchTerm."%'";
+          $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $stmt = $mysqli->prepare($query);
+          $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM authors WHERE MATCH(name) AGAINST(? IN BOOLEAN MODE)");
           break;
       }
     } else {
       if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
-        $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = '".$searchTerm."' group by papers.title LIMIT 10;";
-        $querySize = "SELECT COUNT(*) FROM papers WHERE year = '%".$searchTerm."%'";
+        $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");
+        $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers WHERE year = ?");
         $searchType = 'year';
       } else {
-        $query = "SELECT urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract FROM papers, authors, urls, keywords WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.id=keywords.paperid AND keywords.keyword LIKE '%".$searchTerm."%' group by papers.title LIMIT 10;";
-        $querySize = "SELECT COUNT(*) FROM keywords WHERE keyword LIKE '%".$searchTerm."%'";
-        $searchType = 'keyword';
+        $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
+        $stmt = $mysqli->prepare($query);
+		$stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers INNER JOIN keywords ON papers.id=keywords.paperid WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)");
+        $searchType = 'paper';
       }
     }
-    ?>
+
+    if ($searchType == 'year') {
+	    if ($stmt) {
+			$stmt->bind_param("i", $searchTerm);
+		}
+		if ($stmtSize) {
+			$stmtSize->bind_param("i", $searchTerm);
+		}
+	} else {
+		if ($stmt) {
+			$stmt->bind_param("ss", $searchTerm, $searchTerm);
+		}
+		if ($stmtSize) {
+			$stmtSize->bind_param("s", $searchTerm);
+		}
+	}
+
+  ?>
 
   <header>
     <h2 class="pageTitle1">Project</h2>
     <h1 class="pageTitle2">SciSearcher</h4> 
 
     <div class="scroller_anchor"></div>
-    <form action="results.php" method="GET" class="scroller">
+    <form action="results.php" method="POST" class="scroller">
       <input type="text" name="search" class="round" value="<?php echo $searchTerm ?>"/>
       <button type="submit" class="button">Search</button>
     <div class="searchOptions">
-      <input type="radio" name="searchType" id="Keyword" value='keyword' onchange='this.form.submit()'
+      <input type="radio" name="searchType" id="Paper" value='paper' onchange='this.form.submit()'
       <?php 
-        if($searchType == 'keyword') {
+        if($searchType == 'paper') {
           echo "checked";
         }
       ?>
       />
-        <label for="Keyword">Keyword</label>
-      <input type="radio" name="searchType" id="Title" value='title' onchange='this.form.submit()'
-      <?php 
-        if($searchType == 'title') {
-          echo "checked";
-        }
-      ?>
-      />
-        <label for="Title">Title</label>
+        <label for="Paper">Paper</label>
+
       <input type="radio" name="searchType" id="Year" value='year' onchange='this.form.submit()'
       <?php 
         if($searchType == 'year') {
@@ -118,6 +127,7 @@
       ?>
       />
         <label for="Year">Year</label>
+
       <input type="radio" name="searchType" id="Author" value='author' onchange='this.form.submit()'
       <?php 
         if($searchType == 'author') {
@@ -126,40 +136,31 @@
       ?>
       />
         <label for="Author">Author</label>
-      <input type="radio" name="searchType" id="Field" value='field' onchange='this.form.submit()'
-      <?php 
-        if($searchType == 'field') {
-          echo "checked";
-        }
-      ?>
-      />
-        <label for="Field">Field</label>
-
 
   <?php
-    $resultsHTML = '';
-		$resultsHTML .= "<table class='results'>";
+    $resultsHTML = "<table class='results'>";
     $numRows = 0;
-    if ($result = $mysqli->query($query)) {
-        while ($row = $result->fetch_row()) {
+    $stmt->execute();
+    if ($stmt->bind_result($link, $title, $year, $author, $abstract, $score)) {
+        while ($stmt->fetch()) {
        	  	$resultsHTML .= "<tr>";
-		      	$resultsHTML .= "<td  class='result'>";
-          	$resultsHTML .= "<a class='title' href='".$row[0]."'>".$row[1]."</a>";
+		    $resultsHTML .= "<td  class='result'>";
+          	$resultsHTML .= "<a class='title' href='".$link."'>".$title."</a>";
             $resultsHTML .= "<div class='resultInfo'>";
-            $resultsHTML .= "<p class='author'>By ".$row[3].", ".$row[2]."</p>";
+            $resultsHTML .= "<p class='author'>By ".$author.", ".$year."</p>";
             $resultsHTML .= "</div>";
-            if ($row[4] == ' ') {
+            if ($abstract == ' ') {
               $resultsHTML .= "<p class='abstract'><span class='placeholder'>No abstract available.</span></p>";
             }else {
-              $resultsHTML .= "<p class='abstract'>".$row[4]."</p>";
+              $resultsHTML .= "<p class='abstract'>".$abstract."</p>";
             }
 
           	$resultsHTML .= "</td>";
-			      $resultsHTML .= "</tr>";
+			$resultsHTML .= "</tr>";
             $numRows++;
         }
             
-        $result->close();
+        $stmt->close();
   	}
     $resultsHTML .= "</table>";
 
@@ -169,16 +170,17 @@
     $finish = $time;
     $total_time = round(($finish - $start), 4);
 
-    $sizeResult = $mysqli->query($querySize);
-    $size = $sizeResult->fetch_row();
-    echo "<div id='count'>".$size[0]." matches in ".$total_time." seconds</div>";
-    $sizeResult->close();
+    // $stmtSize->execute();
+    // $stmtSize->bind_result($size);
+    // $stmtSize->fetch();
+    // echo "<div id='count'>".$size." matches in ".$total_time." seconds</div>";
+    // $stmtSize->close();
     $mysqli->close();
     echo "</div>";
     echo "</form>";
     echo "</header>";
     echo $resultsHTML;   
-	?>
+  ?>
         
 </body>
 </html>
