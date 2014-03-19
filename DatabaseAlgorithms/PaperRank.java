@@ -3,17 +3,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.text.DecimalFormat;
-public class PageRank {
+
+public class PaperRank {
+        private static HashMap<Integer, String> paperIDs;
 	private static double[] pageRanks;
 	private static int[] outboundCitations;
 	public static int maxPapers;
 	static Statement statement;
-	 private static Connection conn;
-	 private static Statement st;
+	private static Connection conn;
+	private static Statement st;
 	 
 	 
 	public static void main(String[] args) {
@@ -21,6 +24,9 @@ public class PageRank {
 		maxPapers = getNumberOfPapers();
 		pageRanks = new double[maxPapers];
 		outboundCitations = new int[maxPapers];
+                // Create Hashmap of index to paperid string
+                paperIDs = new HashMap<>(maxPapers);
+                paperIDs = getPaperIDs(maxPapers);
 		//initialise the whole array to 1
 		Arrays.fill(pageRanks, 1.0);
 		// Fill outboundCitations
@@ -35,7 +41,7 @@ public class PageRank {
 	}
 	
 	 private static void startConnection() {
-	        String url = "jdbc:mysql://sproj09.cs.nott.ac.uk:3306";
+	        String url = "jdbc:mysql://sproj08.cs.nott.ac.uk:3306";
 	        String dbName = "SciSearcher";
 	        String driver = "com.mysql.jdbc.Driver";
 	        String userName = "root";
@@ -75,18 +81,19 @@ public class PageRank {
 
 	private static int getOutboundCitation(int id) {
 		int citationCount = 0;
+                String paperID = paperIDs.get(id);
 		
 		// MYSQL QUERY FIND HOW MANY CITATIONS
-			String sql = "Select numcites from papers where paperID ='"+id+"';";
-			try {
-				ResultSet results = statement.executeQuery(sql);//execute statement
-					results.next();
+		String sql = "Select numcites from papers where paperID ='"+paperID+"';";
+		try {
+                    ResultSet results = statement.executeQuery(sql);//execute statement
+                    results.next();
 
-					return  results.getInt(1);
+                    return  results.getInt(1);
 					
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return citationCount;
 	}
 	
@@ -107,22 +114,53 @@ public class PageRank {
 	}	
 	
 	
-	private static ArrayList<String> papersCiting (String id) {
+	private static ArrayList<Integer> papersCiting (int id) {
 		// find every paperID that cites our id parameter
-		ArrayList<String> citesArray = new ArrayList<String>();
-
-		String sql ="SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = "+ id +");";
+		ArrayList<Integer> citesArray = new ArrayList<>();
+                String paperID = paperIDs.get(id);
+		String sql ="SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = "+ paperID +");";
 		try {
 			ResultSet results = statement.executeQuery(sql);
 			while(results.next()) {
-				citesArray.add(results.getString("paperid"));
+                                String pID = results.getString("paperid");                
+				citesArray.add(getIndexForID(pID));
 			}
 		
-			}
-		catch (SQLException e) {
+                } catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 		return citesArray;
 	}
+        
+        private static HashMap<Integer, String> getPaperIDs(int size) {
+            // find every paperID that cites our id parameter
+		HashMap<Integer, String> map = new HashMap<>(size);
+
+		String sql ="SELECT paperid FROM papers;";
+		try {
+			ResultSet results = statement.executeQuery(sql);
+                        int i = 0;
+			while(results.next()) {
+				map.put(i, results.getString("paperid"));
+                                i++;
+			}
+		
+                } catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return map;
+        }
+        
+        /* Finds key for value in paperIDs, returns null if not found. */
+        private static Integer getIndexForID(String paperID) {
+            for (Entry<Integer, String> entry : paperIDs.entrySet()) {
+                if (paperID.equals(entry.getValue())) {
+                    return entry.getKey();
+                }
+            }
+
+            return null;
+        }
 }
