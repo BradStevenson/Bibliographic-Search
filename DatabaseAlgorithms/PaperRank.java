@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 public class PaperRank {
     private static HashMap<Integer, String> paperIDs;
+    private static ArrayList<ArrayList<Integer>> papersCiting;
     private static double[] pageRanks;
     private static int[] outboundCitations;
     public static int maxPapers;
@@ -13,7 +14,7 @@ public class PaperRank {
     private static Connection conn;
     private static Statement st;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {	
 	startConnection();
 	try {
 	    maxPapers = getNumberOfPapers();
@@ -26,6 +27,7 @@ public class PaperRank {
 
 	pageRanks = new double[maxPapers];
 	outboundCitations = new int[maxPapers];
+	papersCiting = new ArrayList<ArrayList<Integer>>(maxPapers);
 	
 	// Create Hashmap of index to paperid string
 	paperIDs = new HashMap<>(maxPapers);
@@ -41,15 +43,25 @@ public class PaperRank {
 	Arrays.fill(pageRanks, 1.0);
 	// Fill outboundCitations
 	try {
-	    for (int i = 0; i < outboundCitations.length; i++) {
-		outboundCitations[i] = getOutboundCitation(i);
-	    }
+	    setOutboundCitations();
 	} catch (SQLException e) {
 	    System.err.println("Getting outbound citation failed.");
 	    e.printStackTrace();
 	    System.exit(1);
 	}
-
+	
+	try {
+	    for (int i=0; i < maxPapers; i++) {
+		papersCiting.add(papersCiting(i));
+	    }
+	} catch (SQLException e) {
+	    System.err.println("Error gathering papers citing.");
+	    e.printStackTrace();
+	    System.exit(1);
+	}
+	System.out.println("Found all incoming citations to papers..");
+	
+	
 	// Need to call ~20 times.
 	for (int i = 1; i <= 20; i++) {
 	    pageRank();
@@ -98,35 +110,25 @@ public class PaperRank {
 	// for every pagerank
 	for (int i = 0; i < pageRanks.length; i++) {
 	    culmativeRank = 0;
-	    try {
-		for (int paper : papersCiting(i)) {
-		    culmativeRank += pageRanks[paper]
-			    / outboundCitations[paper];
-		}
-		pageRanks[i] = (1 - d) + d * (culmativeRank);
-	    } catch (SQLException e) {
-		System.err
-			.println("Error getting papers Citing for paper " + i);
-		e.printStackTrace();
-		System.exit(1);
+	    for (int paper : papersCiting.get(i)) {
+		culmativeRank += pageRanks[paper] / outboundCitations[paper];
 	    }
+	    pageRanks[i] = (1 - d) + d * (culmativeRank);
 	}
     }
 
-    private static int getOutboundCitation(int id) throws SQLException {
+    private static void setOutboundCitations() throws SQLException {
 	PreparedStatement selectNC = null;
-	int citationCount = 0;
-	String paperID = paperIDs.get(id);
 
-	// MYSQL QUERY FIND HOW MANY CITATIONS
-	String selectSQL = "SELECT numCites FROM papers WHERE id =?;";
+	String selectSQL = "SELECT numCites FROM papers;";
 	try {
 	    selectNC = conn.prepareStatement(selectSQL);
-	    selectNC.setString(1, paperID);
 	    ResultSet rs = selectNC.executeQuery();// execute statement
-	    rs.next();
-
-	    citationCount = rs.getInt("numCites");
+	    int i = 0;
+	    while (rs.next()) {
+		outboundCitations[i] = rs.getInt("numCites");
+		i++;
+	    }
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
@@ -136,10 +138,7 @@ public class PaperRank {
 		selectNC.close();
 	    }
 
-	    System.out.println("Outbound citations gathered for "
-		    + paperIDs.get(id) + " " + id);
-
-	    return citationCount;
+	    System.out.println("Outbound citations gathered..");
 	}
     }
 
@@ -160,9 +159,8 @@ public class PaperRank {
 	    if(selectCount != null) {
 		selectCount.close();
 	    }
-
-	    return num;
 	}
+	return num;
     }
 
     private static ArrayList<Integer> papersCiting(int id) throws SQLException {
@@ -189,10 +187,9 @@ public class PaperRank {
 		selectID.close();
 	    }
 
-	    System.out.println("Found all papers citing " + paperIDs.get(id) + " " + id);
-
-	    return citesArray;
+	    System.out.println("Found all papers citing " + paperIDs.get(id) + " " + id + " of "+maxPapers);
 	}
+	return citesArray;
     }
 
     private static HashMap<Integer, String> getPaperIDs(int size) throws SQLException {
@@ -218,10 +215,9 @@ public class PaperRank {
 		selectID.close();
 	    }
 
-	    System.out.println("All " + size + " paper IDs collected");
-
-	    return map;
+	    System.out.println("All " + size + " paper IDs collected..");
 	}
+	return map;
     }
 
     private static void insertPageRanks() throws SQLException {
@@ -254,7 +250,7 @@ public class PaperRank {
 		updatePR.close();
 	    }
 	    conn.setAutoCommit(true);
-	    System.out.println("PageRanks updated in DB");
+	    System.out.println("PageRanks updated in DB..");
 	}
     }
 
