@@ -15,15 +15,28 @@ public class PaperRank {
 
     public static void main(String[] args) {
 	startConnection();
-	maxPapers = getNumberOfPapers();
-
-	System.out.println(maxPapers + " papers found");
+	try {
+	    maxPapers = getNumberOfPapers();
+	} catch (SQLException e) {
+	    System.err.println("Failed getting number of papers");
+	    e.printStackTrace();
+	    System.exit(1);
+	}
+	System.out.println(maxPapers + " papers found..");
 
 	pageRanks = new double[maxPapers];
 	outboundCitations = new int[maxPapers];
+	
 	// Create Hashmap of index to paperid string
 	paperIDs = new HashMap<>(maxPapers);
-	paperIDs = getPaperIDs(maxPapers);
+	try {
+	    paperIDs = getPaperIDs(maxPapers);
+	} catch (SQLException e) {
+	    System.out.println("Error getting paperIDs.");
+	    e.printStackTrace();
+	    System.exit(1);
+	}
+	
 	// initialise the whole array to 1
 	Arrays.fill(pageRanks, 1.0);
 	// Fill outboundCitations
@@ -34,6 +47,7 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Getting outbound citation failed.");
 	    e.printStackTrace();
+	    System.exit(1);
 	}
 
 	// Need to call ~20 times.
@@ -46,22 +60,24 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Inserting PageRanks failed.");
 	    e.printStackTrace();
+	    System.exit(1);
 	}
 	endConnection();
     }
 
     private static void startConnection() {
-	String url = "jdbc:mysql://sproj08.cs.nott.ac.uk:3306/";
+	String url = "jdbc:mysql://127.0.0.1:3305/";
 	String dbName = "SciSearcher";
 	String driver = "com.mysql.jdbc.Driver";
 	String userName = "root";
 	String password = "mNNhv13uBB";
 	try {
+	    System.out.println("Starting Connection..");
 	    Class.forName(driver).newInstance();
 	    conn = DriverManager
 		    .getConnection(url + dbName, userName, password);
 	    st = conn.createStatement();
-	    System.out.println("Connected");
+	    System.out.println("Connected.");
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -92,6 +108,7 @@ public class PaperRank {
 		System.err
 			.println("Error getting papers Citing for paper " + i);
 		e.printStackTrace();
+		System.exit(1);
 	    }
 	}
     }
@@ -113,30 +130,39 @@ public class PaperRank {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	    System.exit(1);
 	} finally {
 	    if (selectNC != null) {
 		selectNC.close();
 	    }
 
 	    System.out.println("Outbound citations gathered for "
-		    + paperIDs.get(id));
+		    + paperIDs.get(id) + " " + id);
 
 	    return citationCount;
 	}
     }
 
-    public static int getNumberOfPapers() {
+    public static int getNumberOfPapers() throws SQLException {
+	PreparedStatement selectCount = null;
 	int num = 0;
-	String sql = "Select COUNT(*) AS count FROM Papers";
+	
+	String selectSQL = "Select COUNT(*) AS count FROM papers";
 	try {
-	    ResultSet results = statement.executeQuery(sql);// execute statement
-	    results.next();
-	    num = results.getInt("count");
+	    selectCount = conn.prepareStatement(selectSQL);
+	    ResultSet rs = selectCount.executeQuery();// execute statement
+	    rs.next();
+	    num = rs.getInt("count");
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	}
+	    System.exit(1);
+	} finally {
+	    if(selectCount != null) {
+		selectCount.close();
+	    }
 
-	return num;
+	    return num;
+	}
     }
 
     private static ArrayList<Integer> papersCiting(int id) throws SQLException {
@@ -157,37 +183,45 @@ public class PaperRank {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	    System.exit(1);
 	} finally {
 	    if (selectID != null) {
 		selectID.close();
 	    }
 
-	    System.out.println("Found all papers citing " + paperIDs.get(id));
+	    System.out.println("Found all papers citing " + paperIDs.get(id) + " " + id);
 
 	    return citesArray;
 	}
     }
 
-    private static HashMap<Integer, String> getPaperIDs(int size) {
+    private static HashMap<Integer, String> getPaperIDs(int size) throws SQLException {
 	// find every paperID that cites our id parameter
+	PreparedStatement selectID = null;
 	HashMap<Integer, String> map = new HashMap<>(size);
 
-	String sql = "SELECT paperid FROM papers;";
+	String selectSQL = "SELECT id FROM papers;";
 	try {
-	    ResultSet results = statement.executeQuery(sql);
+	    selectID = conn.prepareStatement(selectSQL);
+	    ResultSet rs = selectID.executeQuery();
 	    int i = 0;
-	    while (results.next()) {
-		map.put(i, results.getString("paperid"));
+	    while (rs.next()) {
+		map.put(i, rs.getString("id"));
 		i++;
 	    }
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	    System.exit(1);
+	} finally {
+	    if(selectID != null) {
+		selectID.close();
+	    }
+
+	    System.out.println("All " + size + " paper IDs collected");
+
+	    return map;
 	}
-
-	System.out.println("All " + size + " paper IDs collected");
-
-	return map;
     }
 
     private static void insertPageRanks() throws SQLException {
@@ -211,8 +245,10 @@ public class PaperRank {
 		    conn.rollback();
 		} catch (SQLException excep) {
 		    excep.printStackTrace();
+		    System.exit(1);
 		}
 	    }
+	    System.exit(1);
 	} finally {
 	    if (updatePR != null) {
 		updatePR.close();
