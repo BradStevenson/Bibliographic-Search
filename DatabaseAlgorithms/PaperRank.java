@@ -224,9 +224,9 @@ public class PaperRank {
     }
 
     private static void insertPageRanks() throws SQLException {
-	System.out.println("Beginning DB update of PageRanks");
+	System.out.println("Beginning DB update of ClusterIDs for cluster " + id+"..");
 	PreparedStatement updatePR = null;
-	String updateString = "UPDATE papers SET pagerank=? WHERE id = ?;";
+	String updateString = "UPDATE papers SET clusterID=? WHERE id = ?;";
 	try {
 	    conn.setAutoCommit(false);
 	    updatePR = conn.prepareStatement(updateString);
@@ -253,7 +253,7 @@ public class PaperRank {
 		updatePR.close();
 	    }
 	    conn.setAutoCommit(true);
-	    System.out.println("PageRanks updated in DB..");
+	    System.out.println("Cluster "+id+" updated in DB..");
 	}
     }
 

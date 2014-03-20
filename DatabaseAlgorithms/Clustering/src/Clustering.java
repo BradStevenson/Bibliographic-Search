@@ -1,6 +1,7 @@
-import java.net.*;
 import java.sql.*;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
@@ -14,9 +15,23 @@ public class Clustering {
 	startConnection();
 	
 	DirectedGraph<String, DefaultEdge> graph = createCitationGraph();
-
-	getLeftCutGraph(graph);
-	getRightCutGraph(graph);
+	
+	ConnectivityInspector<String, DefaultEdge> conInspect = new ConnectivityInspector<String, DefaultEdge>(graph);
+	List<Set<String>> clusters = conInspect.connectedSets();
+	Iterator<Set<String>> itr = clusters.iterator();
+	
+	int clusterID = 1;
+	while(itr.hasNext()) {
+	    Set<String> cluster = itr.next();
+	    try {
+		setClusterIDs(cluster, clusterID);
+	    } catch (SQLException e) {
+		System.err.println("Error updating cluster " + clusterID +".");
+		e.printStackTrace();
+		System.exit(1);
+	    }
+	    clusterID++;
+	}
 	
 	endConnection();
     }
@@ -99,11 +114,40 @@ public class Clustering {
 	}
     }
     
-    private static DirectedGraph<String, DefaultEdge> getLeftCutGraph(DirectedGraph<String, DefaultEdge> g) {
-	return g;
-    }
-    private static DirectedGraph<String, DefaultEdge> getRightCutGraph(DirectedGraph<String, DefaultEdge> g) {
-	return g;
+    private static void setClusterIDs(Set<String> cluster, int id) throws SQLException {
+	System.out.println("Beginning DB update of ClusterIDs for cluster " + id+"..");
+	PreparedStatement updateCID = null;
+	String updateString = "UPDATE papers SET pagerank=? WHERE id = ?;";
+	try {
+	    conn.setAutoCommit(false);
+	    updateCID = conn.prepareStatement(updateString);
+	    Iterator<String> itr = cluster.iterator();
+	    while (itr.hasNext()) {
+		String paperID = itr.next();
+		updateCID.setInt(1, id);
+		updateCID.setString(2, paperID); 
+		updateCID.executeUpdate();
+		conn.commit();   
+	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	    if (conn != null) {
+		try {
+		    System.err.print("Transaction is being rolled back");
+		    conn.rollback();
+		} catch (SQLException excep) {
+		    excep.printStackTrace();
+		    System.exit(1);
+		}
+	    }
+	    System.exit(1);
+	} finally {
+	    if (updateCID != null) {
+		updateCID.close();
+	    }
+	    conn.setAutoCommit(true);
+	    System.out.println("Cluster "+id+" updated in DB..");
+	}
     }
     
     private static void startConnection() {
