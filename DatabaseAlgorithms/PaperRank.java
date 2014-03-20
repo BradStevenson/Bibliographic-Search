@@ -41,6 +41,8 @@ public class PaperRank {
 	
 	// initialise the whole array to 1
 	Arrays.fill(pageRanks, 1.0);
+	
+	
 	// Fill outboundCitations
 	try {
 	    setOutboundCitations();
@@ -78,7 +80,7 @@ public class PaperRank {
     }
 
     private static void startConnection() {
-	String url = "jdbc:mysql://127.0.0.1:3305/";
+	String url = "jdbc:mysql://127.0.0.1:3306/";
 	String dbName = "SciSearcher";
 	String driver = "com.mysql.jdbc.Driver";
 	String userName = "root";
@@ -169,10 +171,11 @@ public class PaperRank {
 	ArrayList<Integer> citesArray = new ArrayList<>();
 	String paperID = paperIDs.get(id);
 
-	String selectSQL = "SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = ?);";
+	String selectSQL = "SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = ?) AND year = (SELECT year FROM papers WHERE id = ?);";
 	try {
 	    selectID = conn.prepareStatement(selectSQL);
 	    selectID.setString(1, paperID);
+	    selectID.setString(2, paperID);
 	    ResultSet rs = selectID.executeQuery();
 	    while (rs.next()) {
 		String pID = rs.getString("paperid");
@@ -187,7 +190,7 @@ public class PaperRank {
 		selectID.close();
 	    }
 
-	    System.out.println("Found all papers citing " + paperIDs.get(id) + " " + id + " of "+maxPapers);
+	    System.out.println("Found "+citesArray.size()+" papers citing " + paperIDs.get(id) + "\t (" + id + " of "+maxPapers+")");
 	}
 	return citesArray;
     }
