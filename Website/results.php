@@ -28,6 +28,30 @@
           });
       }
   });
+  $(function() {
+    $( '#searchField' ).on("change keyup paste", function() {
+      var isnum = /^\d+$/.test($( this ).val());
+      if (isnum || $( this ).val() == '') {
+        $( "#YearLabel" ).show();
+        if ($( "#YearLabel" ).css('width') != '80px') {
+          $( "#YearLabel" ).animate({
+            opacity: 1,
+            width: 80
+            }, 100, function() {
+          });
+        }
+      } else {
+        if ($( "#YearLabel" ).css('width') != '1px') {
+          $( "#YearLabel" ).animate({
+            opacity: 0.25,
+            width: 1
+            }, 100, function() {
+              $( "#YearLabel" ).hide();
+          });
+        }
+      }
+    });
+  });
   </script>
 </head>
 <body>
@@ -46,14 +70,20 @@
         echo "Connect failed: ".mysqli_connect_error();
     }
 
-    $searchTerm = $_POST["search"];
+    if(isset($_GET["page"])) {
+      $limit = strval(($_GET["page"]*10)-10).', '.strval($_GET["page"]*10).';';
+    } else {
+      $limit = '0, 10;';
+    }
+
+    $searchTerm = $_GET["search"];
     
     $selectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
-    $keywordSelectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
-    $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT 10;";
+    $keywordSelectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
 
-    if(isset($_POST["searchType"])) {
-      $searchType = $_POST["searchType"];
+    if(isset($_GET["searchType"])) {
+      $searchType = $_GET["searchType"];
 
       switch ($searchType){
         case "paper":
@@ -107,10 +137,11 @@
     <h1 class="pageTitle2">SciSearcher</h4> 
 
     <div class="scroller_anchor"></div>
-    <form action="results.php" method="POST" class="scroller">
-      <input type="text" name="search" class="round" value="<?php echo $searchTerm ?>"/>
+    <form action="results.php" method="GET" class="scroller">
+      <input type="text" name="search" class="round" id='searchField' value="<?php echo $searchTerm ?>"/>
       <button type="submit" class="button">Search</button>
     <div class="searchOptions">
+
       <input type="radio" name="searchType" id="Paper" value='paper' onchange='this.form.submit()'
       <?php 
         if($searchType == 'paper') {
@@ -120,14 +151,6 @@
       />
         <label for="Paper">Paper</label>
 
-      <input type="radio" name="searchType" id="Year" value='year' onchange='this.form.submit()'
-      <?php 
-        if($searchType == 'year') {
-          echo "checked";
-        }
-      ?>
-      />
-        <label for="Year">Year</label>
 
       <input type="radio" name="searchType" id="Author" value='author' onchange='this.form.submit()'
       <?php 
@@ -137,6 +160,16 @@
       ?>
       />
         <label for="Author">Author</label>
+
+
+      <input type="radio" name="searchType" id="Year" value='year' onchange='this.form.submit()'
+      <?php 
+        if($searchType == 'year') {
+          echo "checked";
+        }
+      ?>
+      />
+        <label for="Year" id='YearLabel'>Year</label>
 
   <?php
     $resultsHTML = "<table class='results'>";
@@ -183,6 +216,40 @@
     echo "</header>";
     echo $resultsHTML;   
   ?>
-        
+
+  <div class='pageNumbers'>
+    <a 
+    <?php 
+      if(!isset($_GET["page"]) || $_GET["page"] == 1) {
+        echo "class='selected'";
+      }
+    ?>
+    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=1'
+    >1</a>
+    <a 
+    <?php 
+      if (isset($_GET['page'])) {
+        if($_GET["page"] == 2) {
+          echo "class='selected'";
+        }
+      }
+    ?>
+    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=2'>2</a>
+    <a
+    <?php 
+      if (isset($_GET['page'])) {
+        if($_GET["page"] == 3) {
+          echo "class='selected'";
+        }
+      }
+    ?>
+    href='http://sproj09.cs.nott.ac.uk/results.php?
+    <?php 
+      echo 'search='.$_GET["search"];
+      if (isset($_GET["searchType"])) {
+        echo '&searchType='.$_GET["searchType"];
+      }
+    ?>&page=3'>3</a>
+  </div>
 </body>
 </html>
