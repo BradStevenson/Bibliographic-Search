@@ -4,16 +4,19 @@ import java.util.Iterator;
 
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
+import org.jgrapht.alg.*;
 
 
 public class Clustering {
     private static Connection conn;
-    private static Statement st;
 
     public static void main(String[] args) {
 	startConnection();
 	
 	DirectedGraph<String, DefaultEdge> graph = createCitationGraph();
+
+	getLeftCutGraph(graph);
+	getRightCutGraph(graph);
 	
 	endConnection();
     }
@@ -96,6 +99,13 @@ public class Clustering {
 	}
     }
     
+    private static DirectedGraph<String, DefaultEdge> getLeftCutGraph(DirectedGraph<String, DefaultEdge> g) {
+	return g;
+    }
+    private static DirectedGraph<String, DefaultEdge> getRightCutGraph(DirectedGraph<String, DefaultEdge> g) {
+	return g;
+    }
+    
     private static void startConnection() {
 	String url = "jdbc:mysql://127.0.0.1:3306/";
 	String dbName = "SciSearcher";
@@ -107,7 +117,6 @@ public class Clustering {
 	    Class.forName(driver).newInstance();
 	    conn = DriverManager
 		    .getConnection(url + dbName, userName, password);
-	    st = conn.createStatement();
 	    System.out.println("Connected.");
 	} catch (Exception e) {
 	    e.printStackTrace();
