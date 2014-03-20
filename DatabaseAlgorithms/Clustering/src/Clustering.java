@@ -13,15 +13,14 @@ public class Clustering {
     public static void main(String[] args) {
 	startConnection();
 	
-	UndirectedGraph<String, DefaultEdge> graph = createGraph();
+	DirectedGraph<String, DefaultEdge> graph = createCitationGraph();
 	
 	endConnection();
     }
     
-    private static UndirectedGraph<String, DefaultEdge> createGraph()
+    private static DirectedGraph<String, DefaultEdge> createCitationGraph()
     {
-        UndirectedGraph<String, DefaultEdge> g =
-            new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+        DirectedGraph<String, DefaultEdge> g = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
 
         try {
             fillVertexes(g);
@@ -42,7 +41,7 @@ public class Clustering {
         return g;
     }
 
-    private static void fillVertexes(UndirectedGraph<String, DefaultEdge> g) throws SQLException {
+    private static void fillVertexes(DirectedGraph<String, DefaultEdge> g) throws SQLException {
 	PreparedStatement selectID = null;
 	String selectSQL = "SELECT id FROM papers;";
 	try {
@@ -65,7 +64,7 @@ public class Clustering {
 	}
     }
     
-    private static void addEdges(UndirectedGraph<String, DefaultEdge> g) throws SQLException {
+    private static void addEdges(DirectedGraph<String, DefaultEdge> g) throws SQLException {
 	// find every paperID that cites our id parameter
 	PreparedStatement selectID = null;
 	String selectSQL = "SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = ?) AND year = (SELECT year FROM papers WHERE id = ?);";
