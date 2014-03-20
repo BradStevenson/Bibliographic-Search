@@ -78,8 +78,8 @@
 
     $searchTerm = $_GET["search"];
     
-    $selectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
-    $keywordSelectString = "SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $selectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
+    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
     $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
 
     if(isset($_GET["searchType"])) {
@@ -89,46 +89,37 @@
         case "paper":
           $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
-		  $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers INNER JOIN keywords ON papers.id=keywords.paperid WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)");
-          break;
+		  break;
         case "year" :
           $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");      
-          $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers WHERE year = ?");
           break;
         case "author" :
           $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
-          $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM authors WHERE MATCH(name) AGAINST(? IN BOOLEAN MODE)");
           break;
       }
     } else {
       if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
         $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");
-        $stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers WHERE year = ?");
         $searchType = 'year';
       } else {
         $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
         $stmt = $mysqli->prepare($query);
-		$stmtSize = $mysqli->prepare("SELECT COUNT(*) FROM papers INNER JOIN keywords ON papers.id=keywords.paperid WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)");
         $searchType = 'paper';
       }
     }
-
+	
     if ($searchType == 'year') {
 	    if ($stmt) {
 			$stmt->bind_param("i", $searchTerm);
-		}
-		if ($stmtSize) {
-			$stmtSize->bind_param("i", $searchTerm);
 		}
 	} else {
 		if ($stmt) {
 			$stmt->bind_param("ss", $searchTerm, $searchTerm);
 		}
-		if ($stmtSize) {
-			$stmtSize->bind_param("s", $searchTerm);
-		}
 	}
+
+	$stmtSize = $mysqli->prepare("SELECT FOUND_ROWS();");
 
   ?>
 
@@ -193,9 +184,14 @@
 			$resultsHTML .= "</tr>";
             $numRows++;
         }
-            
-        $stmt->close();
+
+        if ($numRows <= 0) {
+         	$resultsHTML .= "<tr><td><p class='abstract'><span class='placeholder'>No results found.</span></p></td></tr>";
+        }     
   	}
+
+    $stmt->close();
+       
     $resultsHTML .= "</table>";
 
     $time = microtime();
@@ -204,12 +200,12 @@
     $finish = $time;
     $total_time = round(($finish - $start), 4);
 
-    // $stmtSize->execute();
-    // $stmtSize->bind_result($size);
-    // $stmtSize->fetch();
-    // echo "<div id='count'>".$size." matches in ".$total_time." seconds</div>";
-    echo "<div id='count'>(".$total_time." seconds)</div>";
-    // $stmtSize->close();
+    $stmtSize->execute();
+    $stmtSize->bind_result($size);
+    $stmtSize->fetch();
+    echo "<div id='count'>".$size." matches (".$total_time." seconds)</div>";
+    //echo "<div id='count'>(".$total_time." seconds)</div>";
+    $stmtSize->close();
     $mysqli->close();
     echo "</div>";
     echo "</form>";
