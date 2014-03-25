@@ -175,6 +175,12 @@ table {
 	color: #2376FF;
 	cursor: pointer;
 }
+.pageNumbers .truncs {
+	color: #303030;
+	font-weight: bold;
+	letter-spacing: 2px;
+	margin: 0 15px 0 5px;
+}
 
 
 footer {
