@@ -170,7 +170,7 @@
         while ($stmt->fetch()) {
        	  	$resultsHTML .= "<tr>";
 		    $resultsHTML .= "<td  class='result'>";
-          	$resultsHTML .= "<a class='title' href='".$link."'>".$title."</a>";
+          	$resultsHTML .= "<a class='title' href='".$link."'' target='_blank'>".$title."</a>";
             $resultsHTML .= "<div class='resultInfo'>";
             $resultsHTML .= "<p class='author'>By ".$author.", ".$year."</p>";
             $resultsHTML .= "</div>";
