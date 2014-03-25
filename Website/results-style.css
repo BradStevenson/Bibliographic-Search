@@ -141,6 +141,14 @@ table {
 		font-style: italic;
 		font-weight: 100;
 	}
+	.result .venueDetails #venueType {
+		color: #303030;
+	}
+	.result .venueDetails {
+		color: #3263B5;
+		font-weight: bold;
+		margin-top: 20px;
+	}
 
 .pageNumbers {
 	text-align: center;

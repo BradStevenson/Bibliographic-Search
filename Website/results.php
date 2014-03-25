@@ -77,8 +77,8 @@
 
     $searchTerm = $_GET["search"];
     
-    $selectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
-    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $selectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
+    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
     $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
 
     if(isset($_GET["searchType"])) {
@@ -165,7 +165,7 @@
     $resultsHTML = "<table class='results'>";
     $numRows = 0;
     $stmt->execute();
-    if ($stmt->bind_result($link, $title, $year, $author, $abstract, $score)) {
+    if ($stmt->bind_result($link, $title, $year, $author, $abstract, $venueType, $venue, $score)) {
         while ($stmt->fetch()) {
        	  	$resultsHTML .= "<tr>";
 		    $resultsHTML .= "<td  class='result'>";
@@ -178,7 +178,9 @@
             }else {
               $resultsHTML .= "<p class='abstract'>".$abstract."</p>";
             }
-
+            if($venueType != '') {
+            	$resultsHTML .= "<p class='venueDetails'><span id='venueType'>".$venueType.":</span> ".$venue."</p>";
+        	}
           	$resultsHTML .= "</td>";
 			$resultsHTML .= "</tr>";
             $numRows++;
