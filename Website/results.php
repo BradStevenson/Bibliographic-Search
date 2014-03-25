@@ -6,7 +6,6 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="results-style.css">
   <script src='jquery-2.1.0.min.js'></script>
-  <script src='jstmt-2.1.0.min.js'></script>
   <script type="text/javascript">
   $(window).scroll(function(e) {
       var scroller_anchor = $(".scroller_anchor").offset().top;
@@ -214,38 +213,22 @@
   ?>
 
   <div class='pageNumbers'>
-    <a 
-    <?php 
-      if(!isset($_GET["page"]) || $_GET["page"] == 1) {
-        echo "class='selected'";
-      }
-    ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=1'
-    >1</a>
-    <a 
-    <?php 
-      if (isset($_GET['page'])) {
-        if($_GET["page"] == 2) {
-          echo "class='selected'";
-        }
-      }
-    ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=2'>2</a>
-    <a
-    <?php 
-      if (isset($_GET['page'])) {
-        if($_GET["page"] == 3) {
-          echo "class='selected'";
-        }
-      }
-    ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?
-    <?php 
-      echo 'search='.$_GET["search"];
-      if (isset($_GET["searchType"])) {
-        echo '&searchType='.$_GET["searchType"];
-      }
-    ?>&page=3'>3</a>
+  	<?php
+  		for($i=1; ($size - ($i-1)*10) > 0; $i++) {
+  			echo "<a ";
+		      if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
+		        echo "class='selected' >".$i."</a>";
+		      } else {
+			    echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
+			    ."''>".$i."</a>";
+			}
+  		}
+  	?>
   </div>
 </body>
+<footer id='resultFooter'>
+	<div>
+		A study of bibliographic data in the research community, by bxs02u, yxc02u, yxm03u, nxm02u, zxp03u, tsc03u.
+	</div>
+</footer>
 </html>

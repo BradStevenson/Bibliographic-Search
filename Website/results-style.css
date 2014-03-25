@@ -190,3 +190,15 @@ footer p {
 	padding-top: 10px;
 	color: #FFFFFF;
 }
+
+#resultFooter {
+	position: relative;
+	background-color: #303030;
+}
+#resultFooter div {
+	text-align: right;
+	line-height: 40px;
+	font-weight: bold;
+	color: white;
+	margin-right: 20px;
+}
