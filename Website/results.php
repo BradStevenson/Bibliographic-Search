@@ -77,8 +77,8 @@
 
     $searchTerm = $_GET["search"];
     
-    $selectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
-    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $selectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid ";
+    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
     $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
 
     if(isset($_GET["searchType"])) {
@@ -169,7 +169,11 @@
         while ($stmt->fetch()) {
        	  	$resultsHTML .= "<tr>";
 		    $resultsHTML .= "<td  class='result'>";
-          	$resultsHTML .= "<a class='title' href='".$link."'' target='_blank'>".$title."</a>";
+		    if (isset($link)) {
+          		$resultsHTML .= "<a class='title' href='".$link."'' target='_blank'>".$title."</a>";
+		    } else {
+          		$resultsHTML .= "<a class='title'>".$title."</a>";
+		    }
             $resultsHTML .= "<div class='resultInfo'>";
             $resultsHTML .= "<p class='author'>By ".$author.", ".$year."</p>";
             $resultsHTML .= "</div>";
@@ -216,14 +220,22 @@
 
   <div class='pageNumbers'>
   	<?php
+
+  		$numPages = $size/10;
+
   		for($i=1; ($size - ($i-1)*10) > 0; $i++) {
-  			echo "<a ";
-		      if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
-		        echo "class='selected' >".$i."</a>";
-		      } else {
-			    echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
-			    ."''>".$i."</a>";
-			}
+  			if ($i > $numPages || $i == 1 || $i == $_GET["page"] || $i == $_GET["page"]-1 || $i == $_GET["page"] +1 || $i == $_GET["page"]-2 || $i == $_GET["page"] +2) {
+  				echo "<a ";
+			      if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
+			        echo "class='selected' >".$i."</a>";
+			      } else {
+				    echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
+				    ."''>".$i."</a>";
+				}
+  			} elseif ( $i == $_GET["page"]-3 || $i == $_GET["page"] +3 ) {
+  				echo "<span class='truncs'>...</span>";
+  			}
+  			
   		}
   	?>
   </div>
