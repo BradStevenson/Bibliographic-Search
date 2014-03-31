@@ -6,7 +6,6 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="results-style.css">
   <script src='jquery-2.1.0.min.js'></script>
-  <script src='jstmt-2.1.0.min.js'></script>
   <script type="text/javascript">
   $(window).scroll(function(e) {
       var scroller_anchor = $(".scroller_anchor").offset().top;
@@ -78,8 +77,8 @@
 
     $searchTerm = $_GET["search"];
     
-    $selectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid ";
-    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid INNER JOIN redirectpdf ON papers.id=redirectpdf.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
+    $selectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid ";
+    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
     $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
 
     if(isset($_GET["searchType"])) {
@@ -89,9 +88,9 @@
         case "paper":
           $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
-		  break;
+      break;
         case "year" :
-          $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");      
+          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = ? group by papers.title LIMIT 10;");      
           break;
         case "author" :
           $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
@@ -100,7 +99,7 @@
       }
     } else {
       if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
-        $stmt = $mysqli->prepare("SELECT redirectpdf.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, 1 AS score FROM papers, authors, redirectpdf WHERE papers.id=authors.paperid AND papers.id=redirectpdf.paperid AND papers.year = ? group by papers.title LIMIT 10;");
+        $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = ? group by papers.title LIMIT 10;");
         $searchType = 'year';
       } else {
         $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
@@ -108,18 +107,18 @@
         $searchType = 'paper';
       }
     }
-	
+  
     if ($searchType == 'year') {
-	    if ($stmt) {
-			$stmt->bind_param("i", $searchTerm);
-		}
-	} else {
-		if ($stmt) {
-			$stmt->bind_param("ss", $searchTerm, $searchTerm);
-		}
-	}
+      if ($stmt) {
+      $stmt->bind_param("i", $searchTerm);
+    }
+  } else {
+    if ($stmt) {
+      $stmt->bind_param("ss", $searchTerm, $searchTerm);
+    }
+  }
 
-	$stmtSize = $mysqli->prepare("SELECT FOUND_ROWS();");
+  $stmtSize = $mysqli->prepare("SELECT FOUND_ROWS();");
 
   ?>
 
@@ -166,11 +165,15 @@
     $resultsHTML = "<table class='results'>";
     $numRows = 0;
     $stmt->execute();
-    if ($stmt->bind_result($link, $title, $year, $author, $abstract, $score)) {
+    if ($stmt->bind_result($link, $title, $year, $author, $abstract, $venueType, $venue, $score)) {
         while ($stmt->fetch()) {
-       	  	$resultsHTML .= "<tr>";
-		    $resultsHTML .= "<td  class='result'>";
-          	$resultsHTML .= "<a class='title' href='".$link."'>".$title."</a>";
+            $resultsHTML .= "<tr>";
+        $resultsHTML .= "<td  class='result'>";
+        if (isset($link)) {
+              $resultsHTML .= "<a class='title' href='".$link."'' target='_blank'>".$title."</a>";
+        } else {
+              $resultsHTML .= "<a class='title'>".$title."</a>";
+        }
             $resultsHTML .= "<div class='resultInfo'>";
             $resultsHTML .= "<p class='author'>By ".$author.", ".$year."</p>";
             $resultsHTML .= "</div>";
@@ -179,16 +182,18 @@
             }else {
               $resultsHTML .= "<p class='abstract'>".$abstract."</p>";
             }
-
-          	$resultsHTML .= "</td>";
-			$resultsHTML .= "</tr>";
+            if($venueType != '') {
+              $resultsHTML .= "<p class='venueDetails'><span id='venueType'>".$venueType.":</span> ".$venue."</p>";
+          }
+            $resultsHTML .= "</td>";
+      $resultsHTML .= "</tr>";
             $numRows++;
         }
 
         if ($numRows <= 0) {
-         	$resultsHTML .= "<tr><td><p class='abstract'><span class='placeholder'>No results found.</span></p></td></tr>";
+          $resultsHTML .= "<tr><td><p class='abstract'><span class='placeholder'>No results found.</span></p></td></tr>";
         }     
-  	}
+    }
 
     $stmt->close();
        
@@ -214,38 +219,32 @@
   ?>
 
   <div class='pageNumbers'>
-    <a 
-    <?php 
-      if(!isset($_GET["page"]) || $_GET["page"] == 1) {
-        echo "class='selected'";
+    <?php
+
+      $numPages = $size/10;
+      if(!isset($_GET["page"])){
+        $_GET["page"] = 1;
       }
-    ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=1'
-    >1</a>
-    <a 
-    <?php 
-      if (isset($_GET['page'])) {
-        if($_GET["page"] == 2) {
-          echo "class='selected'";
+      for($i=1; ($size - ($i-1)*10) > 0; $i++) {
+        if ($i > $numPages || $i == 1 || $i == $_GET["page"] || $i == $_GET["page"]-1 || $i == $_GET["page"] +1 || $i == $_GET["page"]-2 || $i == $_GET["page"] +2) {
+            echo "<a ";
+            if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
+              echo "class='selected' >".$i."</a>";
+            } else {
+            echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
+            ."''>".$i."</a>";
         }
-      }
-    ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?<?php echo 'search='.$_GET["search"].'&searchType='.$_GET["searchType"] ?>&page=2'>2</a>
-    <a
-    <?php 
-      if (isset($_GET['page'])) {
-        if($_GET["page"] == 3) {
-          echo "class='selected'";
+        } elseif ( $i == $_GET["page"]-3 || $i == $_GET["page"] +3 ) {
+          echo "<span class='truncs'>...</span>";
         }
+        
       }
     ?>
-    href='http://sproj09.cs.nott.ac.uk/results.php?
-    <?php 
-      echo 'search='.$_GET["search"];
-      if (isset($_GET["searchType"])) {
-        echo '&searchType='.$_GET["searchType"];
-      }
-    ?>&page=3'>3</a>
   </div>
 </body>
+<footer id='resultFooter'>
+  <div>
+    A study of bibliographic data in the research community, by bxs02u, yxc02u, yxm03u, nxm02u, zxp03u, tsc03u.
+  </div>
+</footer>
 </html>
