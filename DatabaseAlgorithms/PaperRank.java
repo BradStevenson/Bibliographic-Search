@@ -21,7 +21,6 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Failed getting number of papers");
 	    e.printStackTrace();
-	    System.exit(1);
 	}
 	System.out.println(maxPapers + " papers found..");
 
@@ -36,7 +35,6 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.out.println("Error getting paperIDs.");
 	    e.printStackTrace();
-	    System.exit(1);
 	}
 	
 	// initialise the whole array to 1
@@ -49,7 +47,6 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Getting outbound citation failed.");
 	    e.printStackTrace();
-	    System.exit(1);
 	}
 	
 	try {
@@ -59,7 +56,6 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Error gathering papers citing.");
 	    e.printStackTrace();
-	    System.exit(1);
 	}
 	System.out.println("Found all incoming citations to papers..");
 	
@@ -74,7 +70,6 @@ public class PaperRank {
 	} catch (SQLException e) {
 	    System.err.println("Inserting PageRanks failed.");
 	    e.printStackTrace();
-	    System.exit(1);
 	}
 	endConnection();
     }
@@ -134,7 +129,6 @@ public class PaperRank {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    System.exit(1);
 	} finally {
 	    if (selectNC != null) {
 		selectNC.close();
@@ -156,7 +150,6 @@ public class PaperRank {
 	    num = rs.getInt("count");
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    System.exit(1);
 	} finally {
 	    if(selectCount != null) {
 		selectCount.close();
@@ -184,7 +177,6 @@ public class PaperRank {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    System.exit(1);
 	} finally {
 	    if (selectID != null) {
 		selectID.close();
@@ -212,7 +204,6 @@ public class PaperRank {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    System.exit(1);
 	} finally {
 	    if(selectID != null) {
 		selectID.close();
@@ -244,10 +235,8 @@ public class PaperRank {
 		    conn.rollback();
 		} catch (SQLException excep) {
 		    excep.printStackTrace();
-		    System.exit(1);
 		}
 	    }
-	    System.exit(1);
 	} finally {
 	    if (updatePR != null) {
 		updatePR.close();

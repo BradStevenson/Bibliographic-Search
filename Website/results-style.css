@@ -141,6 +141,14 @@ table {
 		font-style: italic;
 		font-weight: 100;
 	}
+	.result .venueDetails #venueType {
+		color: #303030;
+	}
+	.result .venueDetails {
+		color: #3263B5;
+		font-weight: bold;
+		margin-top: 20px;
+	}
 
 .pageNumbers {
 	text-align: center;
@@ -167,6 +175,12 @@ table {
 	color: #2376FF;
 	cursor: pointer;
 }
+.pageNumbers .truncs {
+	color: #303030;
+	font-weight: bold;
+	letter-spacing: 2px;
+	margin: 0 15px 0 5px;
+}
 
 
 footer {
@@ -189,4 +203,16 @@ footer p {
 	text-align: center;
 	padding-top: 10px;
 	color: #FFFFFF;
+}
+
+#resultFooter {
+	position: relative;
+	background-color: #303030;
+}
+#resultFooter div {
+	text-align: right;
+	line-height: 40px;
+	font-weight: bold;
+	color: white;
+	margin-right: 20px;
 }
