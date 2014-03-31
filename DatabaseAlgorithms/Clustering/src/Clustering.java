@@ -84,7 +84,7 @@ public class Clustering implements java.io.Serializable {
 		selectID.close();
 	    }
 
-	    System.out.println("All paper IDs imported as vertexes.");
+	    System.out.println("All paper IDs are imported as vertexes.");
 	}
     }
     
