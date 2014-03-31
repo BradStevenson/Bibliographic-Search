@@ -6,15 +6,23 @@ import java.util.Set;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.alg.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-
-public class Clustering {
+public class Clustering implements java.io.Serializable {
     private static Connection conn;
+    private static final long serialVersionUID = 1L;
+    private static DirectedGraph<String, DefaultEdge> graph;
 
     public static void main(String[] args) {
 	startConnection();
 	
-	DirectedGraph<String, DefaultEdge> graph = createCitationGraph();
+	graph = createCitationGraph();
+	
+	serializeGraph();
 	
 	ConnectivityInspector<String, DefaultEdge> conInspect = new ConnectivityInspector<String, DefaultEdge>(graph);
 	List<Set<String>> clusters = conInspect.connectedSets();
@@ -28,7 +36,6 @@ public class Clustering {
 	    } catch (SQLException e) {
 		System.err.println("Error updating cluster " + clusterID +".");
 		e.printStackTrace();
-		System.exit(1);
 	    }
 	    clusterID++;
 	}
@@ -45,21 +52,21 @@ public class Clustering {
         } catch (SQLException e) {
             System.err.println("Error filling vertexes.");
             e.printStackTrace();
-            System.exit(1);
         }
         
         try {
             addEdges(g);
         } catch (SQLException e) {
-            System.err.println("Error filling vertexes.");
+            System.err.println("Error adding edges.");
             e.printStackTrace();
-            System.exit(1);
         }
 
         return g;
     }
 
     private static void fillVertexes(DirectedGraph<String, DefaultEdge> g) throws SQLException {
+	System.out.println("importing papers as vertexes..");
+	
 	PreparedStatement selectID = null;
 	String selectSQL = "SELECT id FROM papers;";
 	try {
@@ -72,45 +79,44 @@ public class Clustering {
 
 	} catch (SQLException e) {
 	    e.printStackTrace();
-	    System.exit(1);
 	} finally {
 	    if(selectID != null) {
 		selectID.close();
 	    }
 
-	    System.out.println("All paper IDs imported as vertexes..");
+	    System.out.println("All paper IDs imported as vertexes.");
 	}
     }
     
     private static void addEdges(DirectedGraph<String, DefaultEdge> g) throws SQLException {
 	// find every paperID that cites our id parameter
-	PreparedStatement selectID = null;
-	String selectSQL = "SELECT paperid FROM citations WHERE title LIKE (SELECT title FROM papers WHERE id = ?) AND year = (SELECT year FROM papers WHERE id = ?);";
+	System.out.println("Adding citations as edges..");
+	Statement selectID = null;
+	String selectSQL = "SELECT citations.paperid, papers.id FROM papers INNER JOIN citations ON citations.title = papers.title AND citations.year = papers.year;";
 	
-	Iterator<String> itr = g.vertexSet().iterator();
-	while(itr.hasNext()) {
-	    String toID = itr.next();
-	    String fromID = "";
-	    // GET ALL INCOMING LINKS TO PAPERS
-	    try {
-		    selectID = conn.prepareStatement(selectSQL);
-		    selectID.setString(1, toID);
-		    selectID.setString(2, toID);
-		    ResultSet rs = selectID.executeQuery();
-		    rs.next();
-		    fromID = rs.getString("paperid");
-		    g.addEdge(fromID, rs.getString("paperid"));
-
-	    } catch (SQLException e) {
-		    e.printStackTrace();
-		    System.exit(1);
-	    } finally {
-		if (selectID != null) {
-		    selectID.close();
-		}
-		
-		System.out.println("Added edge from "+fromID+" to "+toID);
+	// GET ALL INCOMING LINKS TO PAPERS
+	
+	try {
+	    selectID = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+	    selectID.setFetchSize(Integer.MIN_VALUE);
+	    ResultSet rs = selectID.executeQuery(selectSQL);
+	    String from;
+	    String to;
+	    int i = 1;
+	    while(rs.next()) {
+		from = rs.getString("paperid");
+		to = rs.getString("id");
+		g.addEdge(from, to);
+		System.out.println("Added edge " + from + " -> " + to + " \t number of edges = "+ i +".");
+		i++;
 	    }
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	} finally {
+	    if (selectID != null) {
+		selectID.close();
+	    }
+	    System.out.println("All citations added as edges.");
 	}
     }
     
@@ -137,10 +143,8 @@ public class Clustering {
 		    conn.rollback();
 		} catch (SQLException excep) {
 		    excep.printStackTrace();
-		    System.exit(1);
 		}
 	    }
-	    System.exit(1);
 	} finally {
 	    if (updateCID != null) {
 		updateCID.close();
@@ -172,6 +176,37 @@ public class Clustering {
 	    conn.close();
 	} catch (SQLException e) {
 	    e.printStackTrace();
+	}
+    }
+    
+    public static void serializeGraph() {
+	System.out.println("Serializing graph..");
+	try {
+	FileOutputStream fileOut = new FileOutputStream("/CitationGraph.ser");
+	ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	out.writeObject(graph);
+	out.close();
+	fileOut.close();
+	} catch (IOException i) {
+	    i.printStackTrace();
+	}
+	System.out.println("Graph serialized.");
+    }
+    
+    public static DirectedGraph<String, DefaultEdge> deserializeGraph() {
+	try {
+        	FileInputStream fileIn = new FileInputStream("/matrixGraph.ser");
+        	ObjectInputStream in = new ObjectInputStream(fileIn);
+        	DirectedGraph<String, DefaultEdge> graph = (DirectedGraph<String, DefaultEdge>) in.readObject();
+        	in.close();
+        	fileIn.close();
+        	return graph;
+	} catch (IOException i) {
+	    i.printStackTrace();
+	return null;
+	} catch (ClassNotFoundException c) {
+	    c.printStackTrace();
+	return null;
 	}
     }
 }
