@@ -92,7 +92,7 @@ public class Clustering implements java.io.Serializable {
 	// find every paperID that cites our id parameter
 	System.out.println("Adding citations as edges..");
 	Statement selectID = null;
-	String selectSQL = "SELECT citations.paperid, papers.id FROM papers INNER JOIN citations ON citations.title = papers.title AND citations.year = papers.year;";
+	String selectSQL = "SELECT citations.paperid, papers.id FROM papers INNER JOIN citations ON citations.title LIKE papers.title AND citations.year = papers.year;";
 	
 	// GET ALL INCOMING LINKS TO PAPERS
 	
