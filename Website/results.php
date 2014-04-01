@@ -90,7 +90,7 @@
           $stmt = $mysqli->prepare($query);
       break;
         case "year" :
-          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = ? group by papers.title LIMIT 10;");      
+          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");      
           break;
         case "author" :
           $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
@@ -99,7 +99,7 @@
       }
     } else {
       if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
-        $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.year = ? group by papers.title LIMIT 10;");
+        $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");
         $searchType = 'year';
       } else {
         $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
@@ -167,7 +167,6 @@
     $stmt->execute();
     if ($stmt->bind_result($link, $title, $year, $author, $abstract, $venueType, $venue, $score)) {
         while ($stmt->fetch()) {
-<<<<<<< HEAD
             $resultsHTML .= "<tr>";
         $resultsHTML .= "<td  class='result'>";
         if (isset($link)) {
@@ -175,15 +174,6 @@
         } else {
               $resultsHTML .= "<a class='title'>".$title."</a>";
         }
-=======
-       	  	$resultsHTML .= "<tr>";
-		    $resultsHTML .= "<td  class='result'>";
-		    if (isset($link)) {
-          		$resultsHTML .= "<a class='title' href='".$link."'' target='_blank'>".$title."</a>";
-		    } else {
-          		$resultsHTML .= "<a class='title'>".$title."</a>";
-		    }
->>>>>>> 835ff48ad57fd2a65b3c107f218474975237121a
             $resultsHTML .= "<div class='resultInfo'>";
             $resultsHTML .= "<p class='author'>By ".$author.", ".$year."</p>";
             $resultsHTML .= "</div>";
@@ -193,17 +183,10 @@
               $resultsHTML .= "<p class='abstract'>".$abstract."</p>";
             }
             if($venueType != '') {
-<<<<<<< HEAD
               $resultsHTML .= "<p class='venueDetails'><span id='venueType'>".$venueType.":</span> ".$venue."</p>";
           }
             $resultsHTML .= "</td>";
       $resultsHTML .= "</tr>";
-=======
-            	$resultsHTML .= "<p class='venueDetails'><span id='venueType'>".$venueType.":</span> ".$venue."</p>";
-        	}
-          	$resultsHTML .= "</td>";
-			$resultsHTML .= "</tr>";
->>>>>>> 835ff48ad57fd2a65b3c107f218474975237121a
             $numRows++;
         }
 
@@ -236,7 +219,6 @@
   ?>
 
   <div class='pageNumbers'>
-<<<<<<< HEAD
     <?php
 
       $numPages = $size/10;
@@ -249,8 +231,8 @@
             if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
               echo "class='selected' >".$i."</a>";
             } else {
-            echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
-            ."''>".$i."</a>";
+            echo "href='http://sproj08.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
+            ."'>".$i."</a>";
         }
         } elseif ( $i == $_GET["page"]-3 || $i == $_GET["page"] +3 ) {
           echo "<span class='truncs'>...</span>";
@@ -266,32 +248,4 @@
   </div>
 </footer>
 </html>
-=======
-  	<?php
 
-  		$numPages = $size/10;
-
-  		for($i=1; ($size - ($i-1)*10) > 0; $i++) {
-  			if ($i > $numPages || $i == 1 || $i == $_GET["page"] || $i == $_GET["page"]-1 || $i == $_GET["page"] +1 || $i == $_GET["page"]-2 || $i == $_GET["page"] +2) {
-  				echo "<a ";
-			      if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
-			        echo "class='selected' >".$i."</a>";
-			      } else {
-				    echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
-				    ."''>".$i."</a>";
-				}
-  			} elseif ( $i == $_GET["page"]-3 || $i == $_GET["page"] +3 ) {
-  				echo "<span class='truncs'>...</span>";
-  			}
-  			
-  		}
-  	?>
-  </div>
-</body>
-<footer id='resultFooter'>
-	<div>
-		A study of bibliographic data in the research community, by bxs02u, yxc02u, yxm03u, nxm02u, zxp03u, tsc03u.
-	</div>
-</footer>
-</html>
->>>>>>> 835ff48ad57fd2a65b3c107f218474975237121a

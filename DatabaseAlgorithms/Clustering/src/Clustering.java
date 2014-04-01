@@ -92,7 +92,7 @@ public class Clustering implements java.io.Serializable {
 	// find every paperID that cites our id parameter
 	System.out.println("Adding citations as edges..");
 	Statement selectID = null;
-	String selectSQL = "SELECT citations.paperid, papers.id FROM papers INNER JOIN citations ON citations.title LIKE papers.title AND citations.year = papers.year;";
+	String selectSQL = "SELECT citations.paperid, papers.id FROM papers INNER JOIN citations ON citations.title = papers.title AND citations.year = papers.year;";
 	
 	// GET ALL INCOMING LINKS TO PAPERS
 	
@@ -103,18 +103,23 @@ public class Clustering implements java.io.Serializable {
 	    String from;
 	    String to;
 	    int i = 1;
+	    System.out.println("iterating");
 	    while(rs.next()) {
 		from = rs.getString("paperid");
 		to = rs.getString("id");
 		g.addEdge(from, to);
-		System.out.println("Added edge " + from + " -> " + to + " \t number of edges = "+ i +".");
+		System.out.println("Added edge " + from + "\t->\t" + to + " \t  "+ (i/1956035)*100 +"%");
 		i++;
 	    }
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	} finally {
 	    if (selectID != null) {
-		selectID.close();
+		try {
+		    selectID.close();
+	        } catch (Exception e) {
+	            System.out.println("Error closing statement");
+	        }
 	    }
 	    System.out.println("All citations added as edges.");
 	}
@@ -182,7 +187,7 @@ public class Clustering implements java.io.Serializable {
     public static void serializeGraph() {
 	System.out.println("Serializing graph..");
 	try {
-	FileOutputStream fileOut = new FileOutputStream("/CitationGraph.ser");
+	FileOutputStream fileOut = new FileOutputStream("./CitationGraph.ser");
 	ObjectOutputStream out = new ObjectOutputStream(fileOut);
 	out.writeObject(graph);
 	out.close();
@@ -195,7 +200,7 @@ public class Clustering implements java.io.Serializable {
     
     public static DirectedGraph<String, DefaultEdge> deserializeGraph() {
 	try {
-        	FileInputStream fileIn = new FileInputStream("/matrixGraph.ser");
+        	FileInputStream fileIn = new FileInputStream("./CitationGraph.ser");
         	ObjectInputStream in = new ObjectInputStream(fileIn);
         	DirectedGraph<String, DefaultEdge> graph = (DirectedGraph<String, DefaultEdge>) in.readObject();
         	in.close();
