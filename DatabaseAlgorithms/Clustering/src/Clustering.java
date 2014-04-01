@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class Clustering implements java.io.Serializable {
 		selectID.close();
 	    }
 
-	    System.out.println("All paper IDs are imported as vertexes.");
+	    System.out.println("All paper IDs imported as vertexes.");
 	}
     }
     
@@ -102,13 +103,14 @@ public class Clustering implements java.io.Serializable {
 	    ResultSet rs = selectID.executeQuery(selectSQL);
 	    String from;
 	    String to;
-	    int i = 1;
+	    double i = 1.0;
+	    DecimalFormat df = new DecimalFormat("#.##");
 	    System.out.println("iterating");
 	    while(rs.next()) {
 		from = rs.getString("paperid");
 		to = rs.getString("id");
 		g.addEdge(from, to);
-		System.out.println("Added edge " + from + "\t->\t" + to + " \t  "+ (i/1956035)*100 +"%");
+		System.out.println("Added edge " + from + "\t->\t" + to + " \t  "+ df.format((i/1956035.0)*100) +"%");
 		i++;
 	    }
 	} catch (SQLException e) {
