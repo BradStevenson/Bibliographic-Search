@@ -95,7 +95,6 @@
           break;
         case "author" :
           $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
-          echo $query;
           $stmt = $mysqli->prepare($query);
           break;
       }
