@@ -38,7 +38,7 @@ header form {
 }
 
 header form input[type='text'] {
-	width: calc(100% - 100px);
+	width: calc(100% - 110px);
 	height: 40px;
 	border: 1px solid #e0e0e0;
 	border-right: none;
@@ -182,27 +182,33 @@ table {
 	margin: 0 15px 0 5px;
 }
 
-
 footer {
 	background-color: #2376FF;
-	height: 40px;
 	width: 100%;
+	padding: 10px;
 	position: fixed;
 	bottom: 0;
+	left: 0;
 }
-
-footer p {
+#help {
 	color: #9ecaed;
 	position: relative;
 	font-size: 15px;
 	font-family: Arial;
 	display: block;
 	width: 100px;
-	height: 60px;
 	margin: 0;
 	text-align: center;
-	padding-top: 10px;
 	color: #FFFFFF;
+}
+#helpSlide {
+	display: none;
+	background-color: #ffffff;
+	padding: 20px;
+	width: 100%;
+	color: #000000;
+	position: fixed;
+	bottom: 20;
 }
 
 #resultFooter {
@@ -216,12 +222,16 @@ footer p {
 	color: white;
 	margin-right: 20px;
 }
+#splashFooter p, a{
+	display: inline-block;
+	color: white;
+	margin: 0 10px;
+}
 
 .menuHeaderContainer{
-position: relative;
-top: 0%;
-bottom: 80%;
-left: 0%;
-background: #2376FF;
-
+	position: relative;
+	top: 0%;
+	bottom: 80%;
+	left: 0%;
+	background: #2376FF;
 }
