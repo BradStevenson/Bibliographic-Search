@@ -88,12 +88,13 @@
         case "paper":
           $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
-      break;
+          break;
         case "year" :
           $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");      
           break;
         case "author" :
-          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers, authors, urls WHERE papers.id=authors.paperid AND papers.id=urls.paperid AND papers.authors.name = ? group by papers.title LIMIT 10;");      
+          $query = $keywordSelectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $stmt = $mysqli->prepare($query);
           break;
       }
     } else {
