@@ -54,6 +54,7 @@
   </script>
 </head>
 <body>
+  <div id="container">
   <?php
     ini_set('display_errors', 'On');
     error_reporting(E_ALL);
@@ -93,7 +94,8 @@
           $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");      
           break;
         case "author" :
-          $query = $keywordSelectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
+          echo $query;
           $stmt = $mysqli->prepare($query);
           break;
       }
@@ -146,6 +148,7 @@
       <?php 
         if($searchType == 'author') {
           echo "checked";
+
         }
       ?>
       />
@@ -241,11 +244,12 @@
       }
     ?>
   </div>
-</body>
-<footer id='resultFooter'>
+  </div>
+  <footer id='resultFooter'>
   <div>
     A study of bibliographic data in the research community, by bxs02u, yxc02u, yxm03u, nxm02u, zxp03u, tsc03u.
   </div>
 </footer>
+</body>
 </html>
 
