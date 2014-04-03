@@ -48,3 +48,25 @@ table {
 	right: 10px;
 	display: none;
 }
+
+footer {
+	background-color: #2376FF;
+	height: 40px;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+}
+
+footer p {
+	color: #9ecaed;
+	position: relative;
+	font-size: 15px;
+	font-family: Arial;
+	display: block;
+	width: 100px;
+	height: 60px;
+	margin: 0;
+	text-align: center;
+	padding-top: 10px;
+	color: #FFFFFF;
+}

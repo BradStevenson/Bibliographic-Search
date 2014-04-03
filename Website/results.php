@@ -78,32 +78,32 @@
 
     $searchTerm = $_GET["search"];
     
-    $selectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(authors.name) AGAINST(? IN BOOLEAN MODE) AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid ";
-    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, MATCH(papers.title) AGAINST(? IN BOOLEAN MODE) AS score  FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid INNER JOIN keywords ON papers.id=keywords.paperid ";
-    $endString =  " GROUP BY papers.title ORDER BY score DESC LIMIT ".$limit;
+    $selectString = "SELECT SQL_CALC_FOUND_ROWS search.url, search.title, search.year, search.author, search.abstract, search.venueType, search.venue, MATCH(search.author) AGAINST(? IN BOOLEAN MODE) AS score FROM search ";
+    $keywordSelectString = "SELECT SQL_CALC_FOUND_ROWS search.url, search.title, search.year, search.author, search.abstract, search.venueType, search.venue, MATCH(search.title) AGAINST(? IN BOOLEAN MODE) AS score FROM search, keywords ";
+    $endString =  " GROUP BY search.title ORDER BY score DESC LIMIT ".$limit;
 
     if(isset($_GET["searchType"])) {
       $searchType = $_GET["searchType"];
 
       switch ($searchType){
         case "paper":
-          $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $query = $keywordSelectString."WHERE MATCH(search.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
           break;
         case "year" :
-          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");      
+          $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS url, title, year, author, abstract, venueType, venue, 1 AS score FROM search WHERE year = ? LIMIT 10;");      
           break;
         case "author" :
-          $query = $selectString."WHERE MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)".$endString;
+          $query = $selectString."WHERE MATCH(search.author) AGAINST(? IN BOOLEAN MODE)".$endString;
           $stmt = $mysqli->prepare($query);
           break;
       }
     } else {
       if (preg_match("/^[0-9]{4}$/", $searchTerm, $matches)) {
-        $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS urls.url, papers.title, papers.year, GROUP_CONCAT(authors.name), papers.abstract, papers.venueType, papers.venue, 1 AS score FROM papers INNER JOIN authors ON papers.id=authors.paperid LEFT JOIN urls ON papers.id=urls.paperid WHERE papers.year = ? group by papers.title LIMIT 10;");
+        $stmt = $mysqli->prepare("SELECT SQL_CALC_FOUND_ROWS url, title, year, author, abstract, venueType, venue, 1 AS score FROM search WHERE year = ? LIMIT 10;");
         $searchType = 'year';
       } else {
-        $query = $keywordSelectString."WHERE MATCH(papers.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
+        $query = $keywordSelectString."WHERE MATCH(search.title, keywords.keyword) AGAINST(? IN BOOLEAN MODE)".$endString;
         $stmt = $mysqli->prepare($query);
         $searchType = 'paper';
       }
@@ -233,7 +233,7 @@
             if(($i==1 && !isset($_GET["page"])) || (isset($_GET["page"]) && $_GET["page"] == $i)) {
               echo "class='selected' >".$i."</a>";
             } else {
-            echo "href='http://sproj08.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
+            echo "href='http://sproj09.cs.nott.ac.uk/results.php?search=".$_GET["search"]."&searchType=".$_GET["searchType"]."&page=".$i
             ."'>".$i."</a>";
         }
         } elseif ( $i == $_GET["page"]-3 || $i == $_GET["page"] +3 ) {
@@ -244,11 +244,11 @@
     ?>
   </div>
   </div>
-  <footer id='resultFooter'>
+</body>
+<footer id='resultFooter'>
   <div>
     A study of bibliographic data in the research community, by bxs02u, yxc02u, yxm03u, nxm02u, zxp03u, tsc03u.
   </div>
 </footer>
-</body>
 </html>
 

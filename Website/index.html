@@ -1,9 +1,14 @@
 <html>
-	
-	
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=9"/>
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="results-style.css">
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js">
+			$(document).ready(function() {
+				$("#help").click(function() {
+					$("#helpSlide").slideToggle();
+			});
+		</script>
 	</head>
 	<body>
 		<header>
@@ -16,9 +21,13 @@
 				</div>
 			</form>
 		</header>
-		<footer id='splashFooter'>
-			<p>Help</p>
-			<a href='mailto:g13pkl@nottingham.ac.uk'>Email us</a>
+		<footer>
+			<div id="helpSlide">
+				<h4>Not sure what to search?</h4>
+				<p>You can search anything appropriate, that can help you find a paper that is relevant to you interest.</p>
+				<p>Once you enter your query we will determine whether it is a Year, Author, or Title of a paper.</p>
+			</div>
+			<p id="help">Help</p>
 		</footer>
 	</body>
 </html>
